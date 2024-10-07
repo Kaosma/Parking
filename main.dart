@@ -69,7 +69,7 @@ void validatePersonInput() {
 
 void main(List<String> arguments) {
   while (true) {
-    stdout.write('''
+    print('''
     Välkommen till Parkeringsappen!
     Vad vill du hantera?
     1. Personer
@@ -80,7 +80,12 @@ void main(List<String> arguments) {
 
     Välj ett alternativ (1-5):
   ''');
+
     String? input = stdin.readLineSync();
+    if (input == '5') {
+      print('Du har valt att avsluta, hej då!');
+      break; // Exit the program
+    }
     choiceHandler(input);
   }
 }
