@@ -1,228 +1,47 @@
 import 'dart:io';
+import 'classes.dart';
+import 'crudFunctions.dart';
 
-void choiceHandler(String? choice) {
-  switch (choice) {
-    case '1':
-      personMainHandler();
-      break;
-    case '2':
-      vehicleMainHandler();
-      break;
-    case '3':
-      parkingSpaceMainHandler();
-      break;
-    case '4':
-      parkingMainHandler();
-      break;
-    case '5':
-      return;
-    default:
-      stdout.write('''
-
-        'Ogiltigt val. Välj gärna mellan alternativ 1-5'
-      ''');
-  }
-}
-
-void personMainHandler() {
-  stdout.write('''
-
-    Du har valt att hantera personer. Vad vill du göra?
-    1. Skapa ny person
-    2. Visa alla personer
-    3. Uppdatera person
-    4. Ta bort person
-    5. Gå tillbaka till huvudmenyn
-
-    Välj ett alternativ (1-5):
-  ''');
-  while (!validPersonInput) {
-    final input = stdin.readLineSync();
-    switch (input) {
-      case '1':
-        validatePersonInput();
-        print('nu får du skapa en person!');
-        break;
-      case '2':
-        validatePersonInput();
-        print('nu visas alla personer!');
-        break;
-      case '3':
-        validatePersonInput();
-        print('nu får du uppdatera en person!');
-        break;
-      case '4':
-        validatePersonInput();
-        print('nu får du ta bort en person!');
-        break;
-      case '5':
-        validatePersonInput();
-        return;
-      default:
-        stdout.write('''
-
-          'Ogiltigt val. Välj gärna mellan alternativ 1-5'
-        ''');
-        break;
-    }
-  }
-}
-
-void vehicleMainHandler() {
-  stdout.write('''
-
-    Du har valt att hantera fordon. Vad vill du göra?
-    1. Lägg till nytt fordon
-    2. Visa alla fordon
-    3. Uppdatera fordon
-    4. Ta bort fordon
-    5. Gå tillbaka till huvudmenyn
-
-    Välj ett alternativ (1-5):
-  ''');
-  while (!validVehicleInput) {
-    final input = stdin.readLineSync();
-    switch (input) {
-      case '1':
-        validateVehicleInput();
-        print('nu får du skapa ett fordon!');
-        break;
-      case '2':
-        validateVehicleInput();
-        print('nu visas alla fordon!');
-        break;
-      case '3':
-        validateVehicleInput();
-        print('nu får du uppdatera ett fordon!');
-        break;
-      case '4':
-        validateVehicleInput();
-        print('nu får du ta bort ett fordon!');
-        break;
-      case '5':
-        validateVehicleInput();
-        return;
-      default:
-        stdout.write('''
-
-          'Ogiltigt val. Välj gärna mellan alternativ 1-5'
-        ''');
-        break;
-    }
-  }
-}
-
-void parkingSpaceMainHandler() {
-  stdout.write('''
-
-    Du har valt att hantera parkeringsplatser. Vad vill du göra?
-    1. Lägg till ny parkeringsplats
-    2. Visa alla parkeringsplatser
-    3. Uppdatera parkeringsplats
-    4. Ta bort parkeringsplats
-    5. Gå tillbaka till huvudmenyn
-
-    Välj ett alternativ (1-5):
-  ''');
-  while (!validParkingSpaceInput) {
-    final input = stdin.readLineSync();
-    switch (input) {
-      case '1':
-        validateParkingSpaceInput();
-        print('nu får du skapa en parkeringsplats!');
-        break;
-      case '2':
-        validateParkingSpaceInput();
-        print('nu visas alla parkeringsplatser!');
-        break;
-      case '3':
-        validateParkingSpaceInput();
-        print('nu får du uppdatera en parkeringsplats!');
-        break;
-      case '4':
-        validateParkingSpaceInput();
-        print('nu får du ta bort en parkeringsplats!');
-        break;
-      case '5':
-        validateParkingSpaceInput();
-        return;
-      default:
-        stdout.write('''
-
-          'Ogiltigt val. Välj gärna mellan alternativ 1-5'
-        ''');
-        break;
-    }
-  }
-}
-
-void parkingMainHandler() {
-  stdout.write('''
-
-    Du har valt att hantera parkeringar. Vad vill du göra?
-    1. Lägg till ny parkering
-    2. Visa alla parkeringar
-    3. Uppdatera parkering
-    4. Ta bort parkering
-    5. Gå tillbaka till huvudmenyn
-
-    Välj ett alternativ (1-5):
-  ''');
-  while (!validParkingInput) {
-    final input = stdin.readLineSync();
-    switch (input) {
-      case '1':
-        validateParkingInput();
-        print('nu får du skapa en parkering!');
-        break;
-      case '2':
-        validateParkingInput();
-        print('nu visas alla parkeringar!');
-        break;
-      case '3':
-        validateParkingInput();
-        print('nu får du uppdatera en parkering!');
-        break;
-      case '4':
-        validateParkingInput();
-        print('nu får du ta bort en parkering!');
-        break;
-      case '5':
-        validateParkingInput();
-        return;
-      default:
-        stdout.write('''
-
-          'Ogiltigt val. Välj gärna mellan alternativ 1-5'
-        ''');
-        break;
-    }
-  }
-}
-
-bool validPersonInput = false;
-void validatePersonInput() {
-  validPersonInput = true;
-}
-
-bool validVehicleInput = false;
-void validateVehicleInput() {
-  validVehicleInput = true;
-}
-
-bool validParkingSpaceInput = false;
-void validateParkingSpaceInput() {
-  validParkingSpaceInput = true;
-}
-
-bool validParkingInput = false;
-void validateParkingInput() {
-  validParkingInput = true;
-}
+var personRepository = PersonRepository();
+var vehicleRepository = VehicleRepository();
+var parkingSpaceRepository = ParkingSpaceRepository();
+var parkingRepository = ParkingRepository();
+bool inSubmenu = false;
 
 void main(List<String> arguments) {
-  while (true) {
-    stdout.write('''
+  bool isRunning = true;
+
+  // Main loop
+  while (isRunning) {
+    int choice = mainMenu();
+
+    switch (choice) {
+      case 1:
+        submenu(1);
+        break;
+      case 2:
+        submenu(2);
+        break;
+      case 3:
+        submenu(3);
+        break;
+      case 4:
+        submenu(4);
+        break;
+      case 5:
+        print('Exiting the program...');
+        isRunning = false;
+        break;
+      default:
+        print('Ogiltigt val. Välj gärna mellan alternativ 1-5');
+        break;
+    }
+  }
+}
+
+// Main menu function
+int mainMenu() {
+  stdout.write('''
 
     Välkommen till Parkeringsappen!
     Vad vill du hantera?
@@ -234,15 +53,157 @@ void main(List<String> arguments) {
 
     Välj ett alternativ (1-5):
   ''');
+  return getChoice();
+}
 
-    String? input = stdin.readLineSync();
-    if (input == '5') {
-      stdout.write('''
+String getOptionHeadline(int option) {
+  switch (option) {
+    case 1:
+      return 'personer';
+    case 2:
+      return 'fordon';
+    case 5:
+      return 'parkeringsplatser';
+    case 4:
+      return 'parkeringar';
+    default:
+      return '';
+  }
+}
 
-        'Du har valt att avsluta, hej då!'
-      ''');
-      break; // Exit the program
+// Submenu function for each option
+void submenu(int optionNumber) {
+  var option = getOptionHeadline(optionNumber);
+  inSubmenu = true;
+
+  while (inSubmenu) {
+    print('\nDu har valt att hantera $option. Vad vill du göra?');
+    print('1. Skapa $option.');
+    print('2. Visa alla $option.');
+    print('3. Uppdatera $option.');
+    print('4. Ta bort $option.');
+    print('5. Gå tillbaka till huvudmenyn.');
+
+    int subChoice = getChoice();
+
+    switch (subChoice) {
+      case 1:
+        createInstance(optionNumber);
+        break;
+      case 2:
+        getAllInstances(optionNumber);
+        break;
+      case 3:
+        updateInstance(optionNumber);
+        break;
+      case 4:
+        deleteInstance(optionNumber);
+        break;
+      case 5:
+        inSubmenu = false;
+        break;
+      default:
+        print('Ogiltigt val. Välj gärna mellan alternativ 1-5');
+        break;
     }
-    choiceHandler(input);
+  }
+}
+
+// Function to get the user's choice
+int getChoice() {
+  String? input = stdin.readLineSync();
+  int? choice = int.tryParse(input ?? '');
+  return choice ?? -1;
+}
+
+void createInstance(int optionNumber) {
+  switch (optionNumber) {
+    case 1:
+      createPersonHandler(personRepository);
+      break;
+    case 2:
+      createVehicleHandler(vehicleRepository);
+      break;
+    case 3:
+      createParkingSpaceHandler(parkingSpaceRepository);
+      break;
+    case 4:
+      createParkingHandler(parkingRepository);
+      break;
+    case 5:
+      inSubmenu = false;
+      break;
+    default:
+      print('Ogiltigt val. Välj gärna mellan alternativ 1-5');
+      break;
+  }
+}
+
+void getAllInstances(int optionNumber) {
+  switch (optionNumber) {
+    case 1:
+      getAllItemsHandler(personRepository);
+      break;
+    case 2:
+      getAllItemsHandler(vehicleRepository);
+      break;
+    case 3:
+      getAllItemsHandler(parkingSpaceRepository);
+      break;
+    case 4:
+      getAllItemsHandler(parkingRepository);
+      break;
+    case 5:
+      inSubmenu = false;
+      break;
+    default:
+      print('Ogiltigt val. Välj gärna mellan alternativ 1-5');
+      break;
+  }
+}
+
+void updateInstance(int optionNumber) {
+  switch (optionNumber) {
+    case 1:
+      // updatePersonHandler(personRepository);
+      break;
+    case 2:
+      // updateVehicleHandler(vehicleRepository);
+      break;
+    case 3:
+      // updateParkingSpaceHandler(parkingSpaceRepository);
+      break;
+    case 4:
+      // updateParkingHandler(parkingRepository);
+      break;
+    case 5:
+      inSubmenu = false;
+      break;
+    default:
+      print('Ogiltigt val. Välj gärna mellan alternativ 1-5');
+      break;
+  }
+}
+
+void deleteInstance(int optionNumber) {
+  switch (optionNumber) {
+    case 1:
+      // deletePersonHandler(personRepository);
+      break;
+    case 2:
+      // deleteVehicleHandler(vehicleRepository);
+      break;
+    case 3:
+      // deleteParkingSpaceHandler(parkingSpaceRepository);
+      break;
+    case 4:
+      // deleteParkingHandler(parkingRepository);
+      break;
+    case 5:
+      inSubmenu = false;
+      break;
+    default:
+      print('Ogiltigt val. Välj gärna mellan alternativ 1-5');
+      break;
   }
 }

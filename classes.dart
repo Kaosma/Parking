@@ -14,6 +14,8 @@ class Person {
   String name;
   int personalNumber;
   Person(this.name, this.personalNumber);
+  @override
+  String toString() => '$name, $personalNumber';
 }
 
 class Vehicle {
@@ -21,38 +23,42 @@ class Vehicle {
   String type;
   Person owner;
   Vehicle(this.registrationNumber, this.type, this.owner);
+  @override
+  String toString() => '$registrationNumber, $type, $owner';
 }
 
 class ParkingSpace {
-  String _id = generateUuid();
-  int address;
+  String address;
   int price;
-  ParkingSpace(this._id, this.address, this.price);
+  ParkingSpace(this.address, this.price);
+  @override
+  String toString() => '$address, $price(kr) per timme';
 }
 
 class Parking {
-  String _id = generateUuid();
+  String id = generateUuid();
   Vehicle vehicle;
   ParkingSpace parkingSpace;
   int startTime;
   int endTime;
-  Parking(
-      this._id, this.vehicle, this.parkingSpace, this.startTime, this.endTime);
+  Parking(this.vehicle, this.parkingSpace, this.startTime, this.endTime);
+  @override
+  String toString() => '$vehicle, $parkingSpace, $startTime - $endTime';
 }
 
 abstract class Repository<T> {
   List<T> _items = [];
 
-  void add(T item) => _items.add(item);
+  void addItem(T item) => _items.add(item);
 
-  List<T> getAll() => _items;
+  List<T> get getItems => _items;
 
-  void update(T item, T newItem) {
+  void updateItem(T item, T newItem) {
     var index = _items.indexWhere((element) => element == item);
     _items[index] = newItem;
   }
 
-  void delete(T item) => _items.remove(item);
+  void deleteItem(T item) => _items.remove(item);
 }
 
 class PersonRepository extends Repository<Person> {
@@ -67,11 +73,11 @@ class VehicleRepository extends Repository<Vehicle> {
 }
 
 class ParkingSpaceRepository extends Repository<ParkingSpace> {
-  ParkingSpace getById(String id) =>
-      _items.singleWhere((element) => element._id == id);
+  ParkingSpace getById(String address) =>
+      _items.singleWhere((element) => element.address == address);
 }
 
 class ParkingRepository extends Repository<Parking> {
   Parking getById(String id) =>
-      _items.singleWhere((element) => element._id == id);
+      _items.singleWhere((element) => element.id == id);
 }
