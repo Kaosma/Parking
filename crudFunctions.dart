@@ -73,22 +73,6 @@ void createParkingSpaceHandler(ParkingSpaceRepository repository) {
   }
 }
 
-void createParking(
-    String _registrationNumber,
-    String _parkingSpaceAddress,
-    int _startTime,
-    int _endTime,
-    VehicleRepository _vehicleRepository,
-    ParkingSpaceRepository _parkingSpaceRepository,
-    ParkingRepository _parkingRepository) {
-  Vehicle _vehicle = _vehicleRepository.getItems.firstWhere(
-      (vehicle) => vehicle.registrationNumber == _registrationNumber);
-  ParkingSpace _parkingSpace = _parkingSpaceRepository.getItems.firstWhere(
-      (parkingSpace) => parkingSpace.address == _parkingSpaceAddress);
-  _parkingRepository
-      .addItem(Parking(_vehicle, _parkingSpace, _startTime, _endTime));
-}
-
 void createParkingHandler(
     ParkingRepository _parkingRepository,
     VehicleRepository _vehicleRepository,
@@ -159,10 +143,70 @@ void createParkingHandler(
 
 // READ
 void getAllItemsHandler(Repository repository) {
-  print(repository.getItems.map((item) => item.toString()).join('\t'));
+  print(repository.getItems.map((item) => item.toString()).join('\n'));
 }
 
 // UPDATE
 
-
 // DELETE
+void deletePersonHandler(PersonRepository repository) {
+  while (true) {
+    print('Fyll i personnummer på den person du vill ta bort');
+    String? input = stdin.readLineSync();
+
+    int? personalNumber = int.tryParse(input ?? '');
+
+    if (personalNumber != null &&
+        repository.getItems
+            .any((person) => person.personalNumber == personalNumber)) {
+      repository.deleteItem(repository.getItems
+          .firstWhere((person) => person.personalNumber == personalNumber));
+      break;
+    }
+    print('Invalid input. Try again.');
+  }
+}
+
+void deleteVehicleHandler(VehicleRepository repository) {
+  while (true) {
+    print('Fyll i registreringsnummer på det fordon du vill ta bort');
+    String? registrationInput = stdin.readLineSync();
+
+    if (repository.getItems
+        .any((vehicle) => vehicle.registrationNumber == registrationInput)) {
+      repository.deleteItem(repository.getItems.firstWhere(
+          (vehicle) => vehicle.registrationNumber == registrationInput));
+      break;
+    }
+    print('Invalid input. Try again.');
+  }
+}
+
+void deleteParkingSpaceHandler(ParkingSpaceRepository repository) {
+  while (true) {
+    print('Fyll i adressen för den parkeringsplats du vill ta bort');
+    String? addressInput = stdin.readLineSync();
+
+    if (repository.getItems
+        .any((parkingSpace) => parkingSpace.address == addressInput)) {
+      repository.deleteItem(repository.getItems
+          .firstWhere((parkingSpace) => parkingSpace.address == addressInput));
+      break;
+    }
+    print('Invalid input. Try again.');
+  }
+}
+
+void deleteParkingHandler(ParkingRepository repository) {
+  while (true) {
+    print('Fyll i id för den parkering du vill ta bort');
+    String? idInput = stdin.readLineSync();
+
+    if (repository.getItems.any((parking) => parking.id == idInput)) {
+      repository.deleteItem(
+          repository.getItems.firstWhere((parking) => parking.id == idInput));
+      break;
+    }
+    print('Invalid input. Try again.');
+  }
+}

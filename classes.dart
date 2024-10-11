@@ -44,7 +44,7 @@ class Parking {
   int endTime;
   Parking(this.vehicle, this.parkingSpace, this.startTime, this.endTime);
   @override
-  String toString() => '$vehicle, $parkingSpace, $startTime - $endTime';
+  String toString() => '$id, $vehicle, $parkingSpace, $startTime - $endTime';
 }
 
 abstract class Repository<T> {

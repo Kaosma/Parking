@@ -189,16 +189,16 @@ void updateInstance(int optionNumber) {
 void deleteInstance(int optionNumber) {
   switch (optionNumber) {
     case 1:
-      // deletePersonHandler(personRepository);
+      deletePersonHandler(personRepository);
       break;
     case 2:
-      // deleteVehicleHandler(vehicleRepository);
+      deleteVehicleHandler(vehicleRepository);
       break;
     case 3:
-      // deleteParkingSpaceHandler(parkingSpaceRepository);
+      deleteParkingSpaceHandler(parkingSpaceRepository);
       break;
     case 4:
-      // deleteParkingHandler(parkingRepository);
+      deleteParkingHandler(parkingRepository);
       break;
     case 5:
       inSubmenu = false;
