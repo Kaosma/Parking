@@ -29,7 +29,7 @@ void main(List<String> arguments) {
         submenu(4);
         break;
       case 5:
-        print('Exiting the program...');
+        print('Avslutar programmet... Hej då!');
         isRunning = false;
         break;
       default:
@@ -62,7 +62,7 @@ String getOptionHeadline(int option) {
       return 'personer';
     case 2:
       return 'fordon';
-    case 5:
+    case 3:
       return 'parkeringsplatser';
     case 4:
       return 'parkeringar';
@@ -122,13 +122,14 @@ void createInstance(int optionNumber) {
       createPersonHandler(personRepository);
       break;
     case 2:
-      createVehicleHandler(vehicleRepository);
+      createVehicleHandler(vehicleRepository, personRepository);
       break;
     case 3:
       createParkingSpaceHandler(parkingSpaceRepository);
       break;
     case 4:
-      createParkingHandler(parkingRepository);
+      createParkingHandler(
+          parkingRepository, vehicleRepository, parkingSpaceRepository);
       break;
     case 5:
       inSubmenu = false;
