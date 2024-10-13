@@ -166,16 +166,17 @@ void getAllInstances(int optionNumber) {
 void updateInstance(int optionNumber) {
   switch (optionNumber) {
     case 1:
-      // updatePersonHandler(personRepository);
+      updatePersonHandler(personRepository);
       break;
     case 2:
-      // updateVehicleHandler(vehicleRepository);
+      updateVehicleHandler(vehicleRepository, personRepository);
       break;
     case 3:
-      // updateParkingSpaceHandler(parkingSpaceRepository);
+      updateParkingSpaceHandler(parkingSpaceRepository);
       break;
     case 4:
-      // updateParkingHandler(parkingRepository);
+      updateParkingHandler(
+          parkingRepository, vehicleRepository, parkingSpaceRepository);
       break;
     case 5:
       inSubmenu = false;
