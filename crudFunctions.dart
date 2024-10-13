@@ -1,14 +1,20 @@
 import 'classes.dart';
 import 'dart:io';
 
+String inputHandler(String _input) {
+  print('');
+  print('$_input: ');
+  return stdin.readLineSync() ?? '';
+}
+
+RegExp registrationNumberExpressionValid = RegExp(r'^[a-zA-Z]{3}\d{3}$');
+
 // CREATE
 void createPersonHandler(PersonRepository repository) {
-  print('Fyll i namn');
-  String nameInput = stdin.readLineSync() ?? '';
+  String nameInput = inputHandler('Fyll i namn');
 
   while (true) {
-    print('Fyll i personnummer');
-    String input = stdin.readLineSync() ?? '';
+    String input = inputHandler('Fyll i personnummer');
 
     int? personalNumber = int.tryParse(input);
 
@@ -22,16 +28,16 @@ void createPersonHandler(PersonRepository repository) {
 
 void createVehicleHandler(
     VehicleRepository _vehicleRepository, PersonRepository _personRepository) {
-  // TODO: Error handling
-  print('Fyll i fordonets registreringsnummer');
-  String registrationInput = stdin.readLineSync() ?? '';
+  String registrationInput;
+  while (true) {
+    registrationInput = inputHandler('Fyll i fordonets registreringsnummer');
+    if (registrationNumberExpressionValid.hasMatch(registrationInput)) break;
+  }
 
-  print('Fyll i bilmärke');
-  String typeInput = stdin.readLineSync() ?? '';
+  String typeInput = inputHandler('Fyll i fordonstyp');
 
   while (true) {
-    print('Fyll i en ägares personnummer');
-    String input = stdin.readLineSync() ?? '';
+    String input = inputHandler('Fyll i en ägares personnummer');
 
     int? personalNumber = int.tryParse(input);
 
@@ -48,12 +54,10 @@ void createVehicleHandler(
 }
 
 void createParkingSpaceHandler(ParkingSpaceRepository repository) {
-  print('Fyll i adress');
-  String addressInput = stdin.readLineSync() ?? '';
+  String addressInput = inputHandler('Fyll i adress');
 
   while (true) {
-    print('Fyll i pris per timme (kr)');
-    String input = stdin.readLineSync() ?? '';
+    String input = inputHandler('Fyll i pris per timme (kr)');
 
     int? price = int.tryParse(input);
 
@@ -74,9 +78,8 @@ void createParkingHandler(
   int startTime;
   int endTime;
   while (true) {
-    // TODO: Error handling
-    print('Fyll i fordonets registreringsnummer');
-    String registrationInput = stdin.readLineSync() ?? '';
+    String registrationInput =
+        inputHandler('Fyll i fordonets registreringsnummer');
 
     if (_vehicleRepository.getItems
         .any((element) => element.registrationNumber == registrationInput)) {
@@ -88,8 +91,7 @@ void createParkingHandler(
   }
 
   while (true) {
-    print('Fyll i parkeringsplatsens adress');
-    String addressInput = stdin.readLineSync() ?? '';
+    String addressInput = inputHandler('Fyll i parkeringsplatsens adress');
 
     if (_parkingSpaceRepository.getItems
         .any((element) => element.address == addressInput)) {
@@ -101,8 +103,7 @@ void createParkingHandler(
   }
 
   while (true) {
-    print('Fyll i parkeringens starttid');
-    String input = stdin.readLineSync() ?? '';
+    String input = inputHandler('Fyll i parkeringens starttid');
 
     int? startTimeInput = int.tryParse(input);
 
@@ -114,8 +115,7 @@ void createParkingHandler(
   }
 
   while (true) {
-    print('Fyll i parkeringens sluttid');
-    String input = stdin.readLineSync() ?? '';
+    String input = inputHandler('Fyll i parkeringens sluttid');
 
     int? endTimeInput = int.tryParse(input);
 
@@ -135,6 +135,7 @@ void createParkingHandler(
 
 // READ
 void getAllItemsHandler(Repository repository) {
+  print('');
   print(repository.getItems.map((item) => item.toString()).join('\n'));
 }
 
@@ -142,8 +143,8 @@ void getAllItemsHandler(Repository repository) {
 void updatePersonHandler(PersonRepository repository) {
   int personalNumberToUpdate;
   while (true) {
-    print('Fyll i personnummer på den person du vill uppdatera: ');
-    String input = stdin.readLineSync() ?? '';
+    String input =
+        inputHandler('Fyll i personnummer på den person du vill uppdatera');
 
     int? personalNumber = int.tryParse(input);
 
@@ -159,11 +160,10 @@ void updatePersonHandler(PersonRepository repository) {
       .firstWhere((person) => person.personalNumber == personalNumberToUpdate);
   Person newPerson = personToUpdate;
 
+  print(
+      'Fyll i nya uppgifter för personen du vill uppdatera. Eller skriv ".samma." om du inte vill ändra den uppgiften.');
   while (true) {
-    print('''
-    Fyll i nya uppgifter för personen du vill uppdatera. Eller skriv ".samma." om du inte vill ändra den uppgiften.
-    Nytt personnummer: ''');
-    String input = stdin.readLineSync() ?? '';
+    String input = inputHandler('Uppdatera personnummer');
 
     if (input == '.samma.') {
       break;
@@ -177,8 +177,7 @@ void updatePersonHandler(PersonRepository repository) {
     }
     print('Ogiltigt val. Testa igen.');
   }
-  print('Nytt namn: ');
-  String nameInput = stdin.readLineSync() ?? '';
+  String nameInput = inputHandler('Uppdatera namn');
 
   if (nameInput != '.samma.') newPerson.name = nameInput;
   repository.updateItem(personToUpdate, newPerson);
@@ -188,8 +187,8 @@ void updateVehicleHandler(
     VehicleRepository vehicleRepository, PersonRepository personRepository) {
   String registrationNumberToUpdate;
   while (true) {
-    print('Fyll i registreringsnummer på det fordon du vill uppdatera: ');
-    String registrationInput = stdin.readLineSync() ?? '';
+    String registrationInput = inputHandler(
+        'Fyll i registreringsnummer på det fordon du vill uppdatera');
 
     if (vehicleRepository.getItems
         .any((vehicle) => vehicle.registrationNumber == registrationInput)) {
@@ -202,22 +201,23 @@ void updateVehicleHandler(
       (vehicle) => vehicle.registrationNumber == registrationNumberToUpdate);
   Vehicle newVehicle = vehicleToUpdate;
 
-  print('''
-  Fyll i nya uppgifter för fordonet du vill uppdatera. Eller skriv ".samma." om du inte vill ändra den uppgiften.
-  Nytt registreringsnummer: ''');
-  String registrationInput = stdin.readLineSync() ?? '';
+  print(
+      'Fyll i nya uppgifter för fordonet du vill uppdatera. Eller skriv ".samma." om du inte vill ändra den uppgiften.');
+  String registrationInput;
+  while (true) {
+    registrationInput = inputHandler('Uppdatera registreringsnummer');
+    if (registrationNumberExpressionValid.hasMatch(registrationInput)) break;
+  }
 
   if (registrationInput != '.samma.')
     newVehicle.registrationNumber = registrationInput;
 
-  print('Nytt bilmärke: ');
-  String typeInput = stdin.readLineSync() ?? '';
+  String typeInput = inputHandler('Uppdatera bilmärke');
 
   if (typeInput != '.samma.') newVehicle.type = typeInput;
 
   while (true) {
-    print('Ny ägare (personnummer): ');
-    String input = stdin.readLineSync() ?? '';
+    String input = 'Uppdatera ägare (personnummer)';
 
     if (input == '.samma.') {
       break;
@@ -239,8 +239,8 @@ void updateVehicleHandler(
 void updateParkingSpaceHandler(ParkingSpaceRepository repository) {
   String idToUpdate;
   while (true) {
-    print('Fyll i id för den parkeringsplats du vill uppdatera: ');
-    String idInput = stdin.readLineSync() ?? '';
+    String idInput =
+        inputHandler('Fyll i id för den parkeringsplats du vill uppdatera');
 
     if (repository.getItems.any((parkingSpace) => parkingSpace.id == idInput)) {
       idToUpdate = idInput;
@@ -252,16 +252,14 @@ void updateParkingSpaceHandler(ParkingSpaceRepository repository) {
       .firstWhere((parkingSpace) => parkingSpace.id == idToUpdate);
   ParkingSpace newParkingSpace = parkingSpaceToUpdate;
 
-  print('''
-  Fyll i nya uppgifter för parkeringsplatsen du vill uppdatera. Eller skriv ".samma." om du inte vill ändra den uppgiften.
-  Ny adress: ''');
-  String addressInput = stdin.readLineSync() ?? '';
+  print(
+      'Fyll i nya uppgifter för parkeringsplatsen du vill uppdatera. Eller skriv ".samma." om du inte vill ändra den uppgiften.');
+  String addressInput = inputHandler('Uppdatera adress');
 
   if (addressInput != '.samma.') newParkingSpace.address = addressInput;
 
   while (true) {
-    print('Nytt pris per timme (kr): ');
-    String input = stdin.readLineSync() ?? '';
+    String input = inputHandler('Uppdatera pris per timme (kr)');
 
     if (input == '.samma.') {
       break;
@@ -283,8 +281,8 @@ void updateParkingHandler(
     ParkingSpaceRepository parkingSpaceRepository) {
   String idToUpdate;
   while (true) {
-    print('Fyll i id för den parkering du vill uppdatera: ');
-    String idInput = stdin.readLineSync() ?? '';
+    String idInput =
+        inputHandler('Fyll i id för den parkering du vill uppdatera');
 
     if (parkingRepository.getItems.any((parking) => parking.id == idInput)) {
       idToUpdate = idInput;
@@ -299,8 +297,8 @@ void updateParkingHandler(
   print(
       'Fyll i nya uppgifter för parkeringsplatsen du vill uppdatera. Eller skriv ".samma." om du inte vill ändra den uppgiften.');
   while (true) {
-    print('Nytt fordon (registreringsnummer): ');
-    String registrationInput = stdin.readLineSync() ?? '';
+    String registrationInput =
+        inputHandler('Uppdatera fordon (registreringsnummer)');
     if (registrationInput == '.samma.') {
       break;
     }
@@ -314,8 +312,7 @@ void updateParkingHandler(
   }
 
   while (true) {
-    print('Ny parkeringsplats (id): ');
-    String idInput = stdin.readLineSync() ?? '';
+    String idInput = inputHandler('Uppdatera parkeringsplats (id)');
     if (idInput == '.samma.') {
       break;
     }
@@ -329,8 +326,7 @@ void updateParkingHandler(
   }
 
   while (true) {
-    print('Ny starttid (unix timestamp): ');
-    String input = stdin.readLineSync() ?? '';
+    String input = inputHandler('Uppdatera starttid (unix timestamp)');
 
     if (input == '.samma.') {
       break;
@@ -346,8 +342,7 @@ void updateParkingHandler(
   }
 
   while (true) {
-    print('Ny sluttid (unix timestamp): ');
-    String input = stdin.readLineSync() ?? '';
+    String input = inputHandler('Uppdatera sluttid (unix timestamp)');
 
     if (input == '.samma.') {
       break;
@@ -366,8 +361,8 @@ void updateParkingHandler(
 // DELETE
 void deletePersonHandler(PersonRepository repository) {
   while (true) {
-    print('Fyll i personnummer på den person du vill ta bort');
-    String input = stdin.readLineSync() ?? '';
+    String input =
+        inputHandler('Fyll i personnummer på den person du vill ta bort');
 
     int? personalNumber = int.tryParse(input);
 
@@ -384,8 +379,8 @@ void deletePersonHandler(PersonRepository repository) {
 
 void deleteVehicleHandler(VehicleRepository repository) {
   while (true) {
-    print('Fyll i registreringsnummer på det fordon du vill ta bort');
-    String registrationInput = stdin.readLineSync() ?? '';
+    String registrationInput = inputHandler(
+        'Fyll i registreringsnummer på det fordon du vill ta bort');
 
     if (repository.getItems
         .any((vehicle) => vehicle.registrationNumber == registrationInput)) {
@@ -399,8 +394,8 @@ void deleteVehicleHandler(VehicleRepository repository) {
 
 void deleteParkingSpaceHandler(ParkingSpaceRepository repository) {
   while (true) {
-    print('Fyll i adressen för den parkeringsplats du vill ta bort');
-    String addressInput = stdin.readLineSync() ?? '';
+    String addressInput =
+        inputHandler('Fyll i adressen för den parkeringsplats du vill ta bort');
 
     if (repository.getItems
         .any((parkingSpace) => parkingSpace.address == addressInput)) {
@@ -414,8 +409,8 @@ void deleteParkingSpaceHandler(ParkingSpaceRepository repository) {
 
 void deleteParkingHandler(ParkingRepository repository) {
   while (true) {
-    print('Fyll i id för den parkering du vill ta bort');
-    String idInput = stdin.readLineSync() ?? '';
+    String idInput =
+        inputHandler('Fyll i id för den parkering du vill ta bort');
 
     if (repository.getItems.any((parking) => parking.id == idInput)) {
       repository.deleteItem(

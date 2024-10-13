@@ -10,21 +10,28 @@ String generateUuid() {
   return '${fourRandomHexDigits()}${fourRandomHexDigits()}-${fourRandomHexDigits()}${fourRandomHexDigits()}';
 }
 
+String convertUnixToDateTime(unixTimestamp) {
+  return DateTime.fromMillisecondsSinceEpoch(unixTimestamp * 1000).toString();
+}
+
 class Person {
+  String id = generateUuid();
   String name;
   int personalNumber;
   Person(this.name, this.personalNumber);
   @override
-  String toString() => '$name, $personalNumber';
+  String toString() => '[Namn: $name, Personnummer: $personalNumber]';
 }
 
 class Vehicle {
+  String id = generateUuid();
   String registrationNumber;
   String type;
   Person owner;
   Vehicle(this.registrationNumber, this.type, this.owner);
   @override
-  String toString() => '$registrationNumber, $type, $owner';
+  String toString() =>
+      '[Registreringsnummber: $registrationNumber, Fordonstyp: $type, Ägare: $owner]';
 }
 
 class ParkingSpace {
@@ -33,7 +40,7 @@ class ParkingSpace {
   int price;
   ParkingSpace(this.address, this.price);
   @override
-  String toString() => '$id, $address, $price kr per timme';
+  String toString() => '[$id, $address, $price kr per timme]';
 }
 
 class Parking {
@@ -44,13 +51,16 @@ class Parking {
   int endTime;
   Parking(this.vehicle, this.parkingSpace, this.startTime, this.endTime);
   @override
-  String toString() => '$id, $vehicle, $parkingSpace, $startTime - $endTime';
+  String toString() {
+    String convertedStarttime = convertUnixToDateTime(startTime);
+    String convertedEndtime = convertUnixToDateTime(endTime);
+    return '[$id, $vehicle, $parkingSpace, $convertedStarttime - $convertedEndtime]';
+  }
 }
 
 abstract class Repository<T> {
   List<T> _items = [];
 
-  // Constructor to initialize with an optional list of items
   Repository([List<T>? initialItems]) {
     if (initialItems != null) {
       _items = initialItems;
@@ -79,8 +89,8 @@ class PersonRepository extends Repository<Person> {
 class VehicleRepository extends Repository<Vehicle> {
   VehicleRepository()
       : super([
-          Vehicle('GTN037', 'Ford', Person('Carl', 9811102467)),
-          Vehicle('ABC123', 'Citroen', Person('Gustav', 9211103456))
+          Vehicle('GTN037', 'Bil', Person('Carl', 9811102467)),
+          Vehicle('ABC123', 'Motorcykel', Person('Gustav', 9211103456))
         ]);
   Vehicle getByRegistrationNumber(String registrationNumber) =>
       _items.singleWhere(
@@ -96,7 +106,7 @@ class ParkingSpaceRepository extends Repository<ParkingSpace> {
 class ParkingRepository extends Repository<Parking> {
   ParkingRepository()
       : super([
-          Parking(Vehicle('GTN037', 'Ford', Person('Carl', 9811102467)),
+          Parking(Vehicle('GTN037', 'Bil', Person('Carl', 9811102467)),
               ParkingSpace('Vägvägen 25', 20), 1728656065, 1728657000)
         ]);
   Parking getById(String id) =>
