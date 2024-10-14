@@ -50,11 +50,18 @@ class Parking {
   int startTime;
   int endTime;
   Parking(this.vehicle, this.parkingSpace, this.startTime, this.endTime);
+
+  int calculateParkingPrice() {
+    double timeOfParking = (endTime - startTime) / 3600;
+    return (timeOfParking * parkingSpace.price).round();
+  }
+
   @override
   String toString() {
     String convertedStarttime = convertUnixToDateTime(startTime);
     String convertedEndtime = convertUnixToDateTime(endTime);
-    return '[$id, $vehicle, $parkingSpace, $convertedStarttime - $convertedEndtime]';
+    int parkingPrice = calculateParkingPrice();
+    return '[$id, $vehicle, $parkingSpace, $convertedStarttime-$convertedEndtime, Parking price: $parkingPrice kr]';
   }
 }
 

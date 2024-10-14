@@ -1,12 +1,14 @@
 import 'dart:io';
 import 'classes.dart';
 import 'crudFunctions.dart';
+import 'helperFunctions.dart';
 
 var personRepository = PersonRepository();
 var vehicleRepository = VehicleRepository();
 var parkingSpaceRepository = ParkingSpaceRepository();
 var parkingRepository = ParkingRepository();
 bool inSubmenu = false;
+bool inSearchSubmenu = false;
 
 void main(List<String> arguments) {
   bool isRunning = true;
@@ -29,11 +31,14 @@ void main(List<String> arguments) {
         submenu(4);
         break;
       case 5:
+        searchSubmenu();
+        break;
+      case 6:
         print('Avslutar programmet... Hej då!');
         isRunning = false;
         break;
       default:
-        print('Ogiltigt val. Välj gärna mellan alternativ 1-5');
+        print('Ogiltigt val. Välj gärna mellan alternativ 1-6.');
         break;
     }
   }
@@ -49,7 +54,8 @@ int mainMenu() {
     2. Fordon
     3. Parkeringsplatser
     4. Parkeringar
-    5. Avsluta
+    5. Sök
+    6. Avsluta
 
     Välj ett alternativ (1-5):
   ''');
@@ -103,7 +109,36 @@ void submenu(int optionNumber) {
         inSubmenu = false;
         break;
       default:
-        print('Ogiltigt val. Välj gärna mellan alternativ 1-5');
+        print('Ogiltigt val. Välj gärna mellan alternativ 1-5.');
+        break;
+    }
+  }
+}
+
+// Submenu function for each option
+void searchSubmenu() {
+  inSearchSubmenu = true;
+
+  while (inSearchSubmenu) {
+    print('\nDu har valt att söka. Vad vill du söka på?');
+    print('1. Alla fordon för en ägare (sök på personnummer)');
+    print('2. Alla parkeringar för ett fordon (sök på registreringsnummer)');
+    print('3. Gå tillbaka till huvudmenyn.');
+
+    int subChoice = getChoice();
+
+    switch (subChoice) {
+      case 1:
+        searchForVehiclesByOwner(personRepository, vehicleRepository);
+        break;
+      case 2:
+        searchForParkingsByVehicle(vehicleRepository, parkingRepository);
+        break;
+      case 3:
+        inSearchSubmenu = false;
+        break;
+      default:
+        print('Ogiltigt val. Välj gärna mellan alternativ 1-3.');
         break;
     }
   }

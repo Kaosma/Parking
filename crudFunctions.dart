@@ -1,13 +1,6 @@
 import 'classes.dart';
-import 'dart:io';
 
-String inputHandler(String _input) {
-  print('');
-  print('$_input: ');
-  return stdin.readLineSync() ?? '';
-}
-
-RegExp registrationNumberExpressionValid = RegExp(r'^[a-zA-Z]{3}\d{3}$');
+import 'helperFunctions.dart';
 
 // CREATE
 void createPersonHandler(PersonRepository repository) {
@@ -119,7 +112,7 @@ void createParkingHandler(
 
     int? endTimeInput = int.tryParse(input);
 
-    if (endTimeInput != null) {
+    if (endTimeInput != null && endTimeInput >= startTime) {
       endTime = endTimeInput;
       break;
     }
@@ -217,7 +210,7 @@ void updateVehicleHandler(
   if (typeInput != '.samma.') newVehicle.type = typeInput;
 
   while (true) {
-    String input = 'Uppdatera ägare (personnummer)';
+    String input = inputHandler('Uppdatera ägare (personnummer)');
 
     if (input == '.samma.') {
       break;
@@ -348,10 +341,10 @@ void updateParkingHandler(
       break;
     }
 
-    int? endTime = int.tryParse(input);
+    int? endTimeInput = int.tryParse(input);
 
-    if (endTime != null) {
-      newParking.endTime = endTime;
+    if (endTimeInput != null && endTimeInput >= newParking.startTime) {
+      newParking.endTime = endTimeInput;
       break;
     }
     print('Ogiltigt val. Testa igen.');
