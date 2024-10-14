@@ -3,17 +3,16 @@ import 'classes.dart';
 import 'crudFunctions.dart';
 import 'helperFunctions.dart';
 
+bool inSubmenu = false;
+bool inSearchSubmenu = false;
 var personRepository = PersonRepository();
 var vehicleRepository = VehicleRepository();
 var parkingSpaceRepository = ParkingSpaceRepository();
 var parkingRepository = ParkingRepository();
-bool inSubmenu = false;
-bool inSearchSubmenu = false;
 
 void main(List<String> arguments) {
   bool isRunning = true;
 
-  // Main loop
   while (isRunning) {
     int choice = mainMenu();
 
@@ -44,7 +43,6 @@ void main(List<String> arguments) {
   }
 }
 
-// Main menu function
 int mainMenu() {
   stdout.write('''
 
@@ -62,22 +60,6 @@ int mainMenu() {
   return getChoice();
 }
 
-String getOptionHeadline(int option) {
-  switch (option) {
-    case 1:
-      return 'personer';
-    case 2:
-      return 'fordon';
-    case 3:
-      return 'parkeringsplatser';
-    case 4:
-      return 'parkeringar';
-    default:
-      return '';
-  }
-}
-
-// Submenu function for each option
 void submenu(int optionNumber) {
   var option = getOptionHeadline(optionNumber);
   inSubmenu = true;
@@ -115,7 +97,6 @@ void submenu(int optionNumber) {
   }
 }
 
-// Submenu function for each option
 void searchSubmenu() {
   inSearchSubmenu = true;
 
@@ -144,7 +125,21 @@ void searchSubmenu() {
   }
 }
 
-// Function to get the user's choice
+String getOptionHeadline(int option) {
+  switch (option) {
+    case 1:
+      return 'personer';
+    case 2:
+      return 'fordon';
+    case 3:
+      return 'parkeringsplatser';
+    case 4:
+      return 'parkeringar';
+    default:
+      return '';
+  }
+}
+
 int getChoice() {
   String? input = stdin.readLineSync();
   int? choice = int.tryParse(input ?? '');

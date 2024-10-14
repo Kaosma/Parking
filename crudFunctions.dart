@@ -35,10 +35,8 @@ void createVehicleHandler(
     int? personalNumber = int.tryParse(input);
 
     if (personalNumber != null &&
-        _personRepository.getItems
-            .any((element) => element.personalNumber == personalNumber)) {
-      Person owner = _personRepository.getItems
-          .firstWhere((person) => person.personalNumber == personalNumber);
+        _personRepository.getByPersonalNumber(personalNumber) != false) {
+      Person owner = _personRepository.getByPersonalNumber(personalNumber);
       _vehicleRepository.addItem(Vehicle(registrationInput, typeInput, owner));
       break;
     }
@@ -74,8 +72,8 @@ void createParkingHandler(
     String registrationInput =
         inputHandler('Fyll i fordonets registreringsnummer');
 
-    if (_vehicleRepository.getItems
-        .any((element) => element.registrationNumber == registrationInput)) {
+    if (_vehicleRepository.getByRegistrationNumber(registrationInput) !=
+        false) {
       registrationNumber = registrationInput;
       break;
     }
@@ -86,8 +84,7 @@ void createParkingHandler(
   while (true) {
     String addressInput = inputHandler('Fyll i parkeringsplatsens adress');
 
-    if (_parkingSpaceRepository.getItems
-        .any((element) => element.address == addressInput)) {
+    if (_parkingSpaceRepository.getByAddress(addressInput) != false) {
       address = addressInput;
       break;
     }
@@ -118,10 +115,9 @@ void createParkingHandler(
     }
     print('Ogiltigt val. Testa igen.');
   }
-  Vehicle vehicle = _vehicleRepository.getItems.firstWhere(
-      (vehicle) => vehicle.registrationNumber == registrationNumber);
-  ParkingSpace parkingSpace = _parkingSpaceRepository.getItems
-      .firstWhere((parkingSpace) => parkingSpace.address == address);
+  Vehicle vehicle =
+      _vehicleRepository.getByRegistrationNumber(registrationNumber);
+  ParkingSpace parkingSpace = _parkingSpaceRepository.getByAddress(address);
   _parkingRepository
       .addItem(Parking(vehicle, parkingSpace, startTime, endTime));
 }
@@ -142,15 +138,14 @@ void updatePersonHandler(PersonRepository repository) {
     int? personalNumber = int.tryParse(input);
 
     if (personalNumber != null &&
-        repository.getItems
-            .any((person) => person.personalNumber == personalNumber)) {
+        repository.getByPersonalNumber(personalNumber) != false) {
       personalNumberToUpdate = personalNumber;
       break;
     }
     print('Invalid input. Try again:');
   }
-  Person personToUpdate = repository.getItems
-      .firstWhere((person) => person.personalNumber == personalNumberToUpdate);
+  Person personToUpdate =
+      repository.getByPersonalNumber(personalNumberToUpdate);
   Person newPerson = personToUpdate;
 
   print(
@@ -183,15 +178,14 @@ void updateVehicleHandler(
     String registrationInput = inputHandler(
         'Fyll i registreringsnummer på det fordon du vill uppdatera');
 
-    if (vehicleRepository.getItems
-        .any((vehicle) => vehicle.registrationNumber == registrationInput)) {
+    if (vehicleRepository.getByRegistrationNumber(registrationInput) != false) {
       registrationNumberToUpdate = registrationInput;
       break;
     }
     print('Ogiltigt val. Testa igen.');
   }
-  Vehicle vehicleToUpdate = vehicleRepository.getItems.firstWhere(
-      (vehicle) => vehicle.registrationNumber == registrationNumberToUpdate);
+  Vehicle vehicleToUpdate =
+      vehicleRepository.getByRegistrationNumber(registrationNumberToUpdate);
   Vehicle newVehicle = vehicleToUpdate;
 
   print(
@@ -219,10 +213,8 @@ void updateVehicleHandler(
     int? personalNumber = int.tryParse(input);
 
     if (personalNumber != null &&
-        personRepository.getItems
-            .any((person) => person.personalNumber == personalNumber)) {
-      newVehicle.owner = personRepository.getItems
-          .firstWhere((person) => person.personalNumber == personalNumber);
+        personRepository.getByPersonalNumber(personalNumber) != false) {
+      newVehicle.owner = personRepository.getByPersonalNumber(personalNumber);
       break;
     }
     print('Ogiltigt val. Testa igen.');
@@ -277,14 +269,13 @@ void updateParkingHandler(
     String idInput =
         inputHandler('Fyll i id för den parkering du vill uppdatera');
 
-    if (parkingRepository.getItems.any((parking) => parking.id == idInput)) {
+    if (parkingRepository.getById(idInput) != false) {
       idToUpdate = idInput;
       break;
     }
     print('Ogiltigt val. Testa igen.');
   }
-  Parking parkingToUpdate = parkingRepository.getItems
-      .firstWhere((parking) => parking.id == idToUpdate);
+  Parking parkingToUpdate = parkingRepository.getById(idToUpdate);
   Parking newParking = parkingToUpdate;
 
   print(
@@ -295,10 +286,9 @@ void updateParkingHandler(
     if (registrationInput == '.samma.') {
       break;
     }
-    if (vehicleRepository.getItems
-        .any((vehicle) => vehicle.registrationNumber == registrationInput)) {
-      newParking.vehicle = vehicleRepository.getItems.firstWhere(
-          (vehicle) => vehicle.registrationNumber == registrationInput);
+    if (vehicleRepository.getByRegistrationNumber(registrationInput) != false) {
+      newParking.vehicle =
+          vehicleRepository.getByRegistrationNumber(registrationInput);
       break;
     }
     print('Ogiltigt val. Testa igen.');
@@ -360,10 +350,8 @@ void deletePersonHandler(PersonRepository repository) {
     int? personalNumber = int.tryParse(input);
 
     if (personalNumber != null &&
-        repository.getItems
-            .any((person) => person.personalNumber == personalNumber)) {
-      repository.deleteItem(repository.getItems
-          .firstWhere((person) => person.personalNumber == personalNumber));
+        repository.getByPersonalNumber(personalNumber) != false) {
+      repository.deleteItem(repository.getByPersonalNumber(personalNumber));
       break;
     }
     print('Ogiltigt val. Testa igen.');
@@ -375,10 +363,9 @@ void deleteVehicleHandler(VehicleRepository repository) {
     String registrationInput = inputHandler(
         'Fyll i registreringsnummer på det fordon du vill ta bort');
 
-    if (repository.getItems
-        .any((vehicle) => vehicle.registrationNumber == registrationInput)) {
-      repository.deleteItem(repository.getItems.firstWhere(
-          (vehicle) => vehicle.registrationNumber == registrationInput));
+    if (repository.getByRegistrationNumber(registrationInput) != false) {
+      repository
+          .deleteItem(repository.getByRegistrationNumber(registrationInput));
       break;
     }
     print('Ogiltigt val. Testa igen.');
@@ -405,9 +392,8 @@ void deleteParkingHandler(ParkingRepository repository) {
     String idInput =
         inputHandler('Fyll i id för den parkering du vill ta bort');
 
-    if (repository.getItems.any((parking) => parking.id == idInput)) {
-      repository.deleteItem(
-          repository.getItems.firstWhere((parking) => parking.id == idInput));
+    if (repository.getById(idInput) != false) {
+      repository.deleteItem(repository.getById(idInput));
       break;
     }
     print('Ogiltigt val. Testa igen.');
