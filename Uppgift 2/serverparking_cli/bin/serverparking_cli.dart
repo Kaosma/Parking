@@ -1,4 +1,4 @@
-import 'package:serverparking_cli/main.dart';
+import 'package:serverparking_cli/main/main.dart';
 
 void main(List<String> arguments) async {
   bool isRunning = true;
@@ -8,16 +8,16 @@ void main(List<String> arguments) async {
 
     switch (choice) {
       case 1:
-        submenu(1);
+        await submenu(1);
         break;
       case 2:
-        submenu(2);
+        await submenu(2);
         break;
       case 3:
-        submenu(3);
+        await submenu(3);
         break;
       case 4:
-        submenu(4);
+        await submenu(4);
         break;
       case 5:
         await searchSubmenu();

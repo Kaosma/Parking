@@ -1,124 +1,9 @@
-import 'dart:math';
+import 'dart:convert';
 
-String generateUuid() {
-  final random = Random();
-
-  String fourRandomHexDigits() {
-    return random.nextInt(0x10000).toRadixString(16).padLeft(4, '0');
-  }
-
-  return '${fourRandomHexDigits()}${fourRandomHexDigits()}-${fourRandomHexDigits()}${fourRandomHexDigits()}';
-}
-
-String convertUnixToDateTime(unixTimestamp) {
-  return DateTime.fromMillisecondsSinceEpoch(unixTimestamp * 1000).toString();
-}
-
-class Person {
-  String id = generateUuid();
-  String name;
-  int personalNumber;
-  Person(this.name, this.personalNumber);
-
-  Map<String, dynamic> toJSON() {
-    return {
-      'id': id,
-      'name': name,
-      'personalNumber': personalNumber,
-    };
-  }
-
-  factory Person.fromJSON(Map<String, dynamic> json) {
-    return Person(json['name'], json['personalNumber']);
-  }
-
-  @override
-  String toString() => '[Namn: $name, Personnummer: $personalNumber]';
-}
-
-class Vehicle {
-  String id = generateUuid();
-  String registrationNumber;
-  String type;
-  Person owner;
-  Vehicle(this.registrationNumber, this.type, this.owner);
-
-  Map<String, dynamic> toJSON() {
-    return {
-      'id': id,
-      'registrationNumber': registrationNumber,
-      'type': type,
-      'owner': owner,
-    };
-  }
-
-  factory Vehicle.fromJSON(Map<String, dynamic> json) {
-    return Vehicle(json['registrationNumber'], json['type'], json['owner']);
-  }
-
-  @override
-  String toString() =>
-      '[Registreringsnummber: $registrationNumber, Fordonstyp: $type, Ägare: $owner]';
-}
-
-class ParkingSpace {
-  String id = generateUuid();
-  String address;
-  int price;
-  ParkingSpace(this.address, this.price);
-
-  Map<String, dynamic> toJSON() {
-    return {
-      'id': id,
-      'address': address,
-      'price': price,
-    };
-  }
-
-  factory ParkingSpace.fromJSON(Map<String, dynamic> json) {
-    return ParkingSpace(json['address'], json['price']);
-  }
-
-  @override
-  String toString() => '[$id, $address, $price kr per timme]';
-}
-
-class Parking {
-  String id = generateUuid();
-  Vehicle vehicle;
-  ParkingSpace parkingSpace;
-  int startTime;
-  int endTime;
-  Parking(this.vehicle, this.parkingSpace, this.startTime, this.endTime);
-
-  int calculateParkingPrice() {
-    double timeOfParking = (endTime - startTime) / 3600;
-    return (timeOfParking * parkingSpace.price).round();
-  }
-
-  Map<String, dynamic> toJSON() {
-    return {
-      'id': id,
-      'vehicle': vehicle,
-      'parkingSpace': parkingSpace,
-      'startTime': startTime,
-      'endTime': endTime,
-    };
-  }
-
-  factory Parking.fromJSON(Map<String, dynamic> json) {
-    return Parking(json['vehicle'], json['parkingSpace'], json['startTime'],
-        json['endTime']);
-  }
-
-  @override
-  String toString() {
-    String convertedStarttime = convertUnixToDateTime(startTime);
-    String convertedEndtime = convertUnixToDateTime(endTime);
-    int parkingPrice = calculateParkingPrice();
-    return '[$id, $vehicle, $parkingSpace, $convertedStarttime-$convertedEndtime, Parking price: $parkingPrice kr]';
-  }
-}
+import 'Parking.dart';
+import 'ParkingSpace.dart';
+import 'Person.dart';
+import 'Vehicle.dart';
 
 abstract class Repository<T> {
   final String baseUrl = '';
@@ -134,6 +19,16 @@ abstract class Repository<T> {
   Future<void> addItem(T item) async => _items.add(item);
 
   Future<List<T>> get getItems async => _items;
+
+  // Future<List<T>> getItemsFromServer() async {
+  //   final response = await client.get(Uri.parse('$baseUrl/items'));
+  //   if (response.statusCode = 200) {
+  //     final jsonResponse = jsonDecode(response.body);
+  //     return jsonResponse;
+  //   } else {
+  //     throw Exception('Failed to get items;');
+  //   }
+  // }
 
   Future<void> updateItem(T item, T newItem) async {
     var index = _items.indexWhere((element) => element == item);
@@ -163,6 +58,19 @@ class PersonRepository extends Repository<Person> {
       throw Exception('Person does not exist');
     }
   }
+
+  // Future<void> addPersonItem(Person person) async {
+  //   final uri = Uri.parse('http://localhost:8000/persons');
+  //   final response = await http.post(uri,
+  //       headers: {'Content-Type': 'application/json'},
+  //       body: jsonEncode({
+  //         'name': person.name,
+  //         'personalNumber': person.personalNumber,
+  //         'id': person.id
+  //       }));
+  //   final json = jsonDecode(response.body);
+  //   print(json);
+  // }
 }
 
 class VehicleRepository extends Repository<Vehicle> {

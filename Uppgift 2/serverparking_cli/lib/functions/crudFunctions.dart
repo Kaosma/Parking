@@ -1,9 +1,18 @@
-import 'classes.dart';
+import '../classes/Parking.dart';
+import '../classes/ParkingSpace.dart';
+import '../classes/Person.dart';
+import '../classes/Repository.dart';
+import '../classes/Vehicle.dart';
 
 import 'helperFunctions.dart';
 
+var personRepository = PersonRepository();
+var vehicleRepository = VehicleRepository();
+var parkingSpaceRepository = ParkingSpaceRepository();
+var parkingRepository = ParkingRepository();
+
 // CREATE
-void createPersonHandler(PersonRepository repository) {
+Future<void> createPersonHandler() async {
   String nameInput = inputHandler('Fyll i namn');
 
   while (true) {
@@ -12,15 +21,14 @@ void createPersonHandler(PersonRepository repository) {
     int? personalNumber = int.tryParse(input);
 
     if (personalNumber != null) {
-      repository.addItem(Person(nameInput, personalNumber));
+      personRepository.addItem(Person(nameInput, personalNumber));
       break;
     }
     print('Ogiltigt val. Testa igen.');
   }
 }
 
-void createVehicleHandler(VehicleRepository _vehicleRepository,
-    PersonRepository _personRepository) async {
+Future<void> createVehicleHandler() async {
   String registrationInput;
   while (true) {
     registrationInput = inputHandler('Fyll i fordonets registreringsnummer');
@@ -35,17 +43,16 @@ void createVehicleHandler(VehicleRepository _vehicleRepository,
     int? personalNumber = int.tryParse(input);
 
     if (personalNumber != null &&
-        await _personRepository.getByPersonalNumber(personalNumber) != false) {
-      Person owner =
-          await _personRepository.getByPersonalNumber(personalNumber);
-      _vehicleRepository.addItem(Vehicle(registrationInput, typeInput, owner));
+        await personRepository.getByPersonalNumber(personalNumber) != false) {
+      Person owner = await personRepository.getByPersonalNumber(personalNumber);
+      vehicleRepository.addItem(Vehicle(registrationInput, typeInput, owner));
       break;
     }
     print('Ogiltigt val. Testa igen.');
   }
 }
 
-void createParkingSpaceHandler(ParkingSpaceRepository repository) {
+Future<void> createParkingSpaceHandler() async {
   String addressInput = inputHandler('Fyll i adress');
 
   while (true) {
@@ -54,17 +61,14 @@ void createParkingSpaceHandler(ParkingSpaceRepository repository) {
     int? price = int.tryParse(input);
 
     if (price != null) {
-      repository.addItem(ParkingSpace(addressInput, price));
+      parkingSpaceRepository.addItem(ParkingSpace(addressInput, price));
       break;
     }
     print('Ogiltigt val. Testa igen.');
   }
 }
 
-void createParkingHandler(
-    ParkingRepository _parkingRepository,
-    VehicleRepository _vehicleRepository,
-    ParkingSpaceRepository _parkingSpaceRepository) async {
+Future<void> createParkingHandler() async {
   String registrationNumber;
   String address;
   int startTime;
@@ -73,8 +77,7 @@ void createParkingHandler(
     String registrationInput =
         inputHandler('Fyll i fordonets registreringsnummer');
 
-    if (_vehicleRepository.getByRegistrationNumber(registrationInput) !=
-        false) {
+    if (vehicleRepository.getByRegistrationNumber(registrationInput) != false) {
       registrationNumber = registrationInput;
       break;
     }
@@ -85,7 +88,7 @@ void createParkingHandler(
   while (true) {
     String addressInput = inputHandler('Fyll i parkeringsplatsens adress');
 
-    if (_parkingSpaceRepository.getByAddress(addressInput) != false) {
+    if (parkingSpaceRepository.getByAddress(addressInput) != false) {
       address = addressInput;
       break;
     }
@@ -117,22 +120,39 @@ void createParkingHandler(
     print('Ogiltigt val. Testa igen.');
   }
   Vehicle vehicle =
-      await _vehicleRepository.getByRegistrationNumber(registrationNumber);
+      await vehicleRepository.getByRegistrationNumber(registrationNumber);
   ParkingSpace parkingSpace =
-      await _parkingSpaceRepository.getByAddress(address);
-  _parkingRepository
-      .addItem(Parking(vehicle, parkingSpace, startTime, endTime));
+      await parkingSpaceRepository.getByAddress(address);
+  parkingRepository.addItem(Parking(vehicle, parkingSpace, startTime, endTime));
 }
 
 // READ
-void getAllItemsHandler(Repository repository) async {
-  final items = await repository.getItems;
+Future<void> getAllPersonsHandler() async {
+  final items = await personRepository.getItems;
+  print('');
+  print(items.map((item) => item.toString()).join('\n'));
+}
+
+Future<void> getAllVehiclesHandler() async {
+  final items = await vehicleRepository.getItems;
+  print('');
+  print(items.map((item) => item.toString()).join('\n'));
+}
+
+Future<void> getAllParkingSpacesHandler() async {
+  final items = await parkingSpaceRepository.getItems;
+  print('');
+  print(items.map((item) => item.toString()).join('\n'));
+}
+
+Future<void> getAllParkingsHandler() async {
+  final items = await parkingRepository.getItems;
   print('');
   print(items.map((item) => item.toString()).join('\n'));
 }
 
 // UPDATE
-void updatePersonHandler(PersonRepository repository) async {
+Future<void> updatePersonHandler() async {
   int personalNumberToUpdate;
   while (true) {
     String input =
@@ -141,14 +161,14 @@ void updatePersonHandler(PersonRepository repository) async {
     int? personalNumber = int.tryParse(input);
 
     if (personalNumber != null &&
-        repository.getByPersonalNumber(personalNumber) != false) {
+        personRepository.getByPersonalNumber(personalNumber) != false) {
       personalNumberToUpdate = personalNumber;
       break;
     }
     print('Invalid input. Try again:');
   }
   Person personToUpdate =
-      await repository.getByPersonalNumber(personalNumberToUpdate);
+      await personRepository.getByPersonalNumber(personalNumberToUpdate);
   Person newPerson = personToUpdate;
 
   print(
@@ -171,11 +191,10 @@ void updatePersonHandler(PersonRepository repository) async {
   String nameInput = inputHandler('Uppdatera namn');
 
   if (nameInput != '.samma.') newPerson.name = nameInput;
-  repository.updateItem(personToUpdate, newPerson);
+  personRepository.updateItem(personToUpdate, newPerson);
 }
 
-void updateVehicleHandler(VehicleRepository vehicleRepository,
-    PersonRepository personRepository) async {
+Future<void> updateVehicleHandler() async {
   String registrationNumberToUpdate;
   while (true) {
     String registrationInput = inputHandler(
@@ -225,9 +244,9 @@ void updateVehicleHandler(VehicleRepository vehicleRepository,
   }
 }
 
-void updateParkingSpaceHandler(ParkingSpaceRepository repository) async {
+Future<void> updateParkingSpaceHandler() async {
   String idToUpdate;
-  final repositoryItems = await repository.getItems;
+  final repositoryItems = await parkingSpaceRepository.getItems;
   while (true) {
     String idInput =
         inputHandler('Fyll i id för den parkeringsplats du vill uppdatera');
@@ -264,10 +283,7 @@ void updateParkingSpaceHandler(ParkingSpaceRepository repository) async {
   }
 }
 
-void updateParkingHandler(
-    ParkingRepository parkingRepository,
-    VehicleRepository vehicleRepository,
-    ParkingSpaceRepository parkingSpaceRepository) async {
+Future<void> updateParkingHandler() async {
   String idToUpdate;
   while (true) {
     String idInput =
@@ -346,45 +362,46 @@ void updateParkingHandler(
 }
 
 // DELETE
-void deletePersonHandler(PersonRepository repository) async {
+Future<void> deletePersonHandler() async {
   while (true) {
     String input =
         inputHandler('Fyll i personnummer på den person du vill ta bort');
 
     int? personalNumber = int.tryParse(input);
     if (personalNumber != null &&
-        await repository.getByPersonalNumber(personalNumber) != false) {
-      repository
-          .deleteItem(await repository.getByPersonalNumber(personalNumber));
+        await personRepository.getByPersonalNumber(personalNumber) != false) {
+      personRepository.deleteItem(
+          await personRepository.getByPersonalNumber(personalNumber));
       break;
     }
     print('Ogiltigt val. Testa igen.');
   }
 }
 
-void deleteVehicleHandler(VehicleRepository repository) async {
+Future<void> deleteVehicleHandler() async {
   while (true) {
     String registrationInput = inputHandler(
         'Fyll i registreringsnummer på det fordon du vill ta bort');
-    final vehicle = await repository.getByRegistrationNumber(registrationInput);
+    final vehicle =
+        await vehicleRepository.getByRegistrationNumber(registrationInput);
 
     if (vehicle != false) {
-      repository.deleteItem(vehicle);
+      vehicleRepository.deleteItem(vehicle);
       break;
     }
     print('Ogiltigt val. Testa igen.');
   }
 }
 
-void deleteParkingSpaceHandler(ParkingSpaceRepository repository) async {
+Future<void> deleteParkingSpaceHandler() async {
   while (true) {
     String addressInput =
         inputHandler('Fyll i adressen för den parkeringsplats du vill ta bort');
-    final respositoryItems = await repository.getItems;
+    final respositoryItems = await parkingSpaceRepository.getItems;
 
     if (respositoryItems
         .any((parkingSpace) => parkingSpace.address == addressInput)) {
-      repository.deleteItem(respositoryItems
+      parkingSpaceRepository.deleteItem(respositoryItems
           .firstWhere((parkingSpace) => parkingSpace.address == addressInput));
       break;
     }
@@ -392,13 +409,13 @@ void deleteParkingSpaceHandler(ParkingSpaceRepository repository) async {
   }
 }
 
-void deleteParkingHandler(ParkingRepository repository) async {
+Future<void> deleteParkingHandler() async {
   while (true) {
     String idInput =
         inputHandler('Fyll i id för den parkering du vill ta bort');
-    final parking = await repository.getById(idInput);
+    final parking = await parkingRepository.getById(idInput);
     if (parking != false) {
-      repository.deleteItem(parking);
+      parkingRepository.deleteItem(parking);
       break;
     }
     print('Ogiltigt val. Testa igen.');

@@ -1,6 +1,34 @@
 import 'dart:io';
+import 'dart:math';
 
-import 'classes.dart';
+import '../classes/Repository.dart';
+
+var personRepository = PersonRepository();
+var vehicleRepository = VehicleRepository();
+var parkingRepository = ParkingRepository();
+
+RegExp registrationNumberExpressionValid = RegExp(r'^[a-zA-Z]{3}\d{3}$');
+
+String getOptionHeadline(int option) {
+  switch (option) {
+    case 1:
+      return 'personer';
+    case 2:
+      return 'fordon';
+    case 3:
+      return 'parkeringsplatser';
+    case 4:
+      return 'parkeringar';
+    default:
+      return '';
+  }
+}
+
+int getChoice() {
+  String? input = stdin.readLineSync();
+  int? choice = int.tryParse(input ?? '');
+  return choice ?? -1;
+}
 
 String inputHandler(String _input) {
   print('');
@@ -8,10 +36,21 @@ String inputHandler(String _input) {
   return stdin.readLineSync() ?? '';
 }
 
-RegExp registrationNumberExpressionValid = RegExp(r'^[a-zA-Z]{3}\d{3}$');
+String generateUuid() {
+  final random = Random();
 
-Future<void> searchForVehiclesByOwner(PersonRepository personRepository,
-    VehicleRepository vehicleRepository) async {
+  String fourRandomHexDigits() {
+    return random.nextInt(0x10000).toRadixString(16).padLeft(4, '0');
+  }
+
+  return '${fourRandomHexDigits()}${fourRandomHexDigits()}-${fourRandomHexDigits()}${fourRandomHexDigits()}';
+}
+
+String convertUnixToDateTime(unixTimestamp) {
+  return DateTime.fromMillisecondsSinceEpoch(unixTimestamp * 1000).toString();
+}
+
+Future<void> searchForVehiclesByOwner() async {
   final persons = await personRepository.getItems;
   final vehicles = await vehicleRepository.getItems;
   String personalNumberAsString = inputHandler('Sök på en ägares personnummer');
@@ -28,8 +67,7 @@ Future<void> searchForVehiclesByOwner(PersonRepository personRepository,
     print('Inga fordon funna för personnummer: $personalNumberAsString');
 }
 
-Future<void> searchForParkingsByVehicle(VehicleRepository vehicleRepository,
-    ParkingRepository parkingRepository) async {
+Future<void> searchForParkingsByVehicle() async {
   final repositoryParkings = await parkingRepository.getItems;
   String registrationNumber =
       inputHandler('Sök på ett fordons registreringsnummer');

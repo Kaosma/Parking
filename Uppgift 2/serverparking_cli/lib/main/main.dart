@@ -1,14 +1,9 @@
 import 'dart:io';
-import 'classes.dart';
-import 'crudFunctions.dart';
-import 'helperFunctions.dart';
+import '../functions/crudFunctions.dart';
+import '../functions/helperFunctions.dart';
 
 bool inSubmenu = false;
 bool inSearchSubmenu = false;
-var personRepository = PersonRepository();
-var vehicleRepository = VehicleRepository();
-var parkingSpaceRepository = ParkingSpaceRepository();
-var parkingRepository = ParkingRepository();
 
 int mainMenu() {
   stdout.write('''
@@ -27,7 +22,7 @@ int mainMenu() {
   return getChoice();
 }
 
-void submenu(int optionNumber) {
+Future<void> submenu(int optionNumber) async {
   var option = getOptionHeadline(optionNumber);
   inSubmenu = true;
 
@@ -43,16 +38,16 @@ void submenu(int optionNumber) {
 
     switch (subChoice) {
       case 1:
-        createInstance(optionNumber);
+        await createInstance(optionNumber);
         break;
       case 2:
-        getAllInstances(optionNumber);
+        await getAllInstances(optionNumber);
         break;
       case 3:
-        updateInstance(optionNumber);
+        await updateInstance(optionNumber);
         break;
       case 4:
-        deleteInstance(optionNumber);
+        await deleteInstance(optionNumber);
         break;
       case 5:
         inSubmenu = false;
@@ -77,10 +72,10 @@ Future<void> searchSubmenu() async {
 
     switch (subChoice) {
       case 1:
-        await searchForVehiclesByOwner(personRepository, vehicleRepository);
+        await searchForVehiclesByOwner();
         break;
       case 2:
-        await searchForParkingsByVehicle(vehicleRepository, parkingRepository);
+        await searchForParkingsByVehicle();
         break;
       case 3:
         inSearchSubmenu = false;
@@ -92,41 +87,19 @@ Future<void> searchSubmenu() async {
   }
 }
 
-String getOptionHeadline(int option) {
-  switch (option) {
-    case 1:
-      return 'personer';
-    case 2:
-      return 'fordon';
-    case 3:
-      return 'parkeringsplatser';
-    case 4:
-      return 'parkeringar';
-    default:
-      return '';
-  }
-}
-
-int getChoice() {
-  String? input = stdin.readLineSync();
-  int? choice = int.tryParse(input ?? '');
-  return choice ?? -1;
-}
-
-void createInstance(int optionNumber) {
+Future<void> createInstance(int optionNumber) async {
   switch (optionNumber) {
     case 1:
-      createPersonHandler(personRepository);
+      await createPersonHandler();
       break;
     case 2:
-      createVehicleHandler(vehicleRepository, personRepository);
+      await createVehicleHandler();
       break;
     case 3:
-      createParkingSpaceHandler(parkingSpaceRepository);
+      await createParkingSpaceHandler();
       break;
     case 4:
-      createParkingHandler(
-          parkingRepository, vehicleRepository, parkingSpaceRepository);
+      await createParkingHandler();
       break;
     case 5:
       inSubmenu = false;
@@ -137,19 +110,19 @@ void createInstance(int optionNumber) {
   }
 }
 
-void getAllInstances(int optionNumber) {
+Future<void> getAllInstances(int optionNumber) async {
   switch (optionNumber) {
     case 1:
-      getAllItemsHandler(personRepository);
+      await getAllPersonsHandler();
       break;
     case 2:
-      getAllItemsHandler(vehicleRepository);
+      await getAllVehiclesHandler();
       break;
     case 3:
-      getAllItemsHandler(parkingSpaceRepository);
+      await getAllParkingSpacesHandler();
       break;
     case 4:
-      getAllItemsHandler(parkingRepository);
+      await getAllParkingsHandler();
       break;
     case 5:
       inSubmenu = false;
@@ -160,20 +133,19 @@ void getAllInstances(int optionNumber) {
   }
 }
 
-void updateInstance(int optionNumber) {
+Future<void> updateInstance(int optionNumber) async {
   switch (optionNumber) {
     case 1:
-      updatePersonHandler(personRepository);
+      await updatePersonHandler();
       break;
     case 2:
-      updateVehicleHandler(vehicleRepository, personRepository);
+      await updateVehicleHandler();
       break;
     case 3:
-      updateParkingSpaceHandler(parkingSpaceRepository);
+      await updateParkingSpaceHandler();
       break;
     case 4:
-      updateParkingHandler(
-          parkingRepository, vehicleRepository, parkingSpaceRepository);
+      await updateParkingHandler();
       break;
     case 5:
       inSubmenu = false;
@@ -184,19 +156,19 @@ void updateInstance(int optionNumber) {
   }
 }
 
-void deleteInstance(int optionNumber) {
+Future<void> deleteInstance(int optionNumber) async {
   switch (optionNumber) {
     case 1:
-      deletePersonHandler(personRepository);
+      await deletePersonHandler();
       break;
     case 2:
-      deleteVehicleHandler(vehicleRepository);
+      await deleteVehicleHandler();
       break;
     case 3:
-      deleteParkingSpaceHandler(parkingSpaceRepository);
+      await deleteParkingSpaceHandler();
       break;
     case 4:
-      deleteParkingHandler(parkingRepository);
+      await deleteParkingHandler();
       break;
     case 5:
       inSubmenu = false;
