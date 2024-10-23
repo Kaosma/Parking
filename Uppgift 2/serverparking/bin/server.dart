@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:serverparking/serverFunctions.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart';
 import 'package:shelf_router/shelf_router.dart';
@@ -7,7 +8,34 @@ import 'package:shelf_router/shelf_router.dart';
 // Configure routes.
 final _router = Router()
   ..get('/', _rootHandler)
-  ..get('/echo/<message>', _echoHandler);
+  ..get('/echo/<message>', _echoHandler)
+  // Person routes
+  ..post('/person', postPersonHandler)
+  ..get('/persons', getAllPersonsHandler)
+  ..get('/person/<id>', getPersonHandler)
+  ..put('/person/<id>', updatePersonHandler)
+  ..delete('/person/<id>', deletePersonHandler)
+
+  // Vehicle routes
+  ..post('/vehicle', postVehicleHandler)
+  ..get('/vehicles', getAllVehiclesHandler)
+  ..get('/vehicle/<id>', getVehicleHandler)
+  ..put('/vehicle/<id>', updateVehicleHandler)
+  ..delete('/vehicle/<id>', deleteVehicleHandler)
+
+  // ParkingSpace routes
+  ..post('/parking-space', postParkingSpaceHandler)
+  ..get('/parking-spaces', getAllParkingSpacesHandler)
+  ..get('/parking-space/<id>', getParkingSpaceHandler)
+  ..put('/parking-space/<id>', updateParkingSpaceHandler)
+  ..delete('/parking-space/<id>', deleteParkingSpaceHandler)
+
+  // Parking routes
+  ..post('/parking', postParkingHandler)
+  ..get('/parkings', getAllParkingsHandler)
+  ..get('/parking/<id>', getParkingHandler)
+  ..put('/parking/<id>', updateParkingHandler)
+  ..delete('/parking/<id>', deleteParkingHandler);
 
 Response _rootHandler(Request req) {
   return Response.ok('Hello, World!\n');
