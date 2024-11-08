@@ -1,10 +1,11 @@
-import '../functions/helperFunctions.dart';
+import '../helpers/generateUuid.dart';
 
 class ParkingSpace {
-  String id = generateUuid();
+  String id;
   String address;
   int price;
-  ParkingSpace(this.address, this.price);
+  ParkingSpace(this.address, this.price, [String? id])
+      : id = id ?? generateUuid();
 
   Map<String, dynamic> toJSON() {
     return {
@@ -15,7 +16,7 @@ class ParkingSpace {
   }
 
   factory ParkingSpace.fromJSON(Map<String, dynamic> json) {
-    return ParkingSpace(json['address'], json['price']);
+    return ParkingSpace(json['id'], json['address'], json['price']);
   }
 
   @override

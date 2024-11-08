@@ -1,14 +1,21 @@
+import '../helpers/convertUnixToDateTime.dart';
+import '../helpers/generateUuid.dart';
 import 'ParkingSpace.dart';
 import 'Vehicle.dart';
-import '../functions/helperFunctions.dart';
 
 class Parking {
-  String id = generateUuid();
+  String id;
   Vehicle vehicle;
   ParkingSpace parkingSpace;
   int startTime;
   int endTime;
-  Parking(this.vehicle, this.parkingSpace, this.startTime, this.endTime);
+  Parking(
+      {required this.vehicle,
+      required this.parkingSpace,
+      required this.startTime,
+      required this.endTime,
+      String? id})
+      : id = id ?? generateUuid();
 
   int calculateParkingPrice() {
     double timeOfParking = (endTime - startTime) / 3600;
@@ -26,8 +33,12 @@ class Parking {
   }
 
   factory Parking.fromJSON(Map<String, dynamic> json) {
-    return Parking(json['vehicle'], json['parkingSpace'], json['startTime'],
-        json['endTime']);
+    return Parking(
+        id: json['id'],
+        vehicle: json['vehicle'],
+        parkingSpace: json['parkingSpace'],
+        startTime: json['startTime'],
+        endTime: json['endTime']);
   }
 
   @override

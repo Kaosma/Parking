@@ -6,10 +6,14 @@ version: 1.0.0
 environment:
   sdk: ^3.5.3
 
+publish_to: none
+
 # Add regular dependencies here.
 dependencies:
   http: ^1.2.2
   # path: ^1.8.0
+  serverparking_shared:
+    path: ../serverparking_shared
 
 dev_dependencies:
   lints: ^4.0.0

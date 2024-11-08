@@ -1,10 +1,11 @@
-import 'package:serverparking_cli/functions/helperFunctions.dart';
+import 'package:serverparking_shared/src/helpers/generateUuid.dart';
 
 class Person {
-  String id = generateUuid();
+  String id;
   String name;
   int personalNumber;
-  Person(this.name, this.personalNumber);
+  Person(this.name, this.personalNumber, [String? id])
+      : id = id ?? generateUuid();
 
   Map<String, dynamic> toJSON() {
     return {
@@ -15,7 +16,7 @@ class Person {
   }
 
   factory Person.fromJSON(Map<String, dynamic> json) {
-    return Person(json['name'], json['personalNumber']);
+    return Person(json['id'], json['name'], json['personalNumber']);
   }
 
   @override

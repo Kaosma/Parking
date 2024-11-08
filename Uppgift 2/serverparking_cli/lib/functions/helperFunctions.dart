@@ -1,7 +1,9 @@
 import 'dart:io';
 import 'dart:math';
 
-import '../classes/Repository.dart';
+import '../repositories/parking_repository.dart';
+import '../repositories/person_repository.dart';
+import '../repositories/vehicle_repository.dart';
 
 var personRepository = PersonRepository();
 var vehicleRepository = VehicleRepository();
@@ -51,8 +53,8 @@ String convertUnixToDateTime(unixTimestamp) {
 }
 
 Future<void> searchForVehiclesByOwner() async {
-  final persons = await personRepository.getItems;
-  final vehicles = await vehicleRepository.getItems;
+  final persons = await personRepository.getAll();
+  final vehicles = await vehicleRepository.getAll();
   String personalNumberAsString = inputHandler('Sök på en ägares personnummer');
   int? ownerPersonalNumber = int.tryParse(personalNumberAsString);
   if (ownerPersonalNumber == null ||
@@ -68,7 +70,7 @@ Future<void> searchForVehiclesByOwner() async {
 }
 
 Future<void> searchForParkingsByVehicle() async {
-  final repositoryParkings = await parkingRepository.getItems;
+  final repositoryParkings = await parkingRepository.getAll();
   String registrationNumber =
       inputHandler('Sök på ett fordons registreringsnummer');
   if (repositoryParkings.any(

@@ -1,9 +1,10 @@
-import '../classes/Parking.dart';
-import '../classes/ParkingSpace.dart';
-import '../classes/Person.dart';
-import '../classes/Repository.dart';
-import '../classes/Vehicle.dart';
+import 'package:serverparking_shared/serverparking_shared.dart';
 
+import '../repositories/parkingSpace_repository.dart';
+import '../repositories/parking_repository.dart';
+import '../repositories/person_repository.dart';
+
+import '../repositories/vehicle_repository.dart';
 import 'helperFunctions.dart';
 
 var personRepository = PersonRepository();
@@ -21,7 +22,7 @@ Future<void> createPersonHandler() async {
     int? personalNumber = int.tryParse(input);
 
     if (personalNumber != null) {
-      personRepository.addItem(Person(nameInput, personalNumber));
+      personRepository.add(Person(nameInput, personalNumber));
       break;
     }
     print('Ogiltigt val. Testa igen.');
@@ -45,7 +46,7 @@ Future<void> createVehicleHandler() async {
     if (personalNumber != null &&
         await personRepository.getByPersonalNumber(personalNumber) != false) {
       Person owner = await personRepository.getByPersonalNumber(personalNumber);
-      vehicleRepository.addItem(Vehicle(registrationInput, typeInput, owner));
+      vehicleRepository.add(Vehicle(registrationInput, typeInput, owner));
       break;
     }
     print('Ogiltigt val. Testa igen.');
@@ -61,7 +62,7 @@ Future<void> createParkingSpaceHandler() async {
     int? price = int.tryParse(input);
 
     if (price != null) {
-      parkingSpaceRepository.addItem(ParkingSpace(addressInput, price));
+      parkingSpaceRepository.add(ParkingSpace(addressInput, price));
       break;
     }
     print('Ogiltigt val. Testa igen.');
@@ -123,30 +124,34 @@ Future<void> createParkingHandler() async {
       await vehicleRepository.getByRegistrationNumber(registrationNumber);
   ParkingSpace parkingSpace =
       await parkingSpaceRepository.getByAddress(address);
-  parkingRepository.addItem(Parking(vehicle, parkingSpace, startTime, endTime));
+  parkingRepository.add(Parking(
+      vehicle: vehicle,
+      parkingSpace: parkingSpace,
+      startTime: startTime,
+      endTime: endTime));
 }
 
 // READ
 Future<void> getAllPersonsHandler() async {
-  final items = await personRepository.getItems;
+  final items = await personRepository.getAll();
   print('');
   print(items.map((item) => item.toString()).join('\n'));
 }
 
 Future<void> getAllVehiclesHandler() async {
-  final items = await vehicleRepository.getItems;
+  final items = await vehicleRepository.getAll();
   print('');
   print(items.map((item) => item.toString()).join('\n'));
 }
 
 Future<void> getAllParkingSpacesHandler() async {
-  final items = await parkingSpaceRepository.getItems;
+  final items = await parkingSpaceRepository.getAll();
   print('');
   print(items.map((item) => item.toString()).join('\n'));
 }
 
 Future<void> getAllParkingsHandler() async {
-  final items = await parkingRepository.getItems;
+  final items = await parkingRepository.getAll();
   print('');
   print(items.map((item) => item.toString()).join('\n'));
 }
@@ -191,7 +196,7 @@ Future<void> updatePersonHandler() async {
   String nameInput = inputHandler('Uppdatera namn');
 
   if (nameInput != '.samma.') newPerson.name = nameInput;
-  personRepository.updateItem(personToUpdate, newPerson);
+  personRepository.update(personToUpdate.id, newPerson);
 }
 
 Future<void> updateVehicleHandler() async {
@@ -246,7 +251,7 @@ Future<void> updateVehicleHandler() async {
 
 Future<void> updateParkingSpaceHandler() async {
   String idToUpdate;
-  final repositoryItems = await parkingSpaceRepository.getItems;
+  final repositoryItems = await parkingSpaceRepository.getAll();
   while (true) {
     String idInput =
         inputHandler('Fyll i id för den parkeringsplats du vill uppdatera');
@@ -319,7 +324,7 @@ Future<void> updateParkingHandler() async {
     if (idInput == '.samma.') {
       break;
     }
-    final repositoryItems = await parkingSpaceRepository.getItems;
+    final repositoryItems = await parkingSpaceRepository.getAll();
     if (repositoryItems.any((parkingSpace) => parkingSpace.id == idInput)) {
       newParking.parkingSpace = repositoryItems
           .firstWhere((parkingSpace) => parkingSpace.id == idInput);
@@ -370,8 +375,7 @@ Future<void> deletePersonHandler() async {
     int? personalNumber = int.tryParse(input);
     if (personalNumber != null &&
         await personRepository.getByPersonalNumber(personalNumber) != false) {
-      personRepository.deleteItem(
-          await personRepository.getByPersonalNumber(personalNumber));
+      personRepository.delete(personalNumber);
       break;
     }
     print('Ogiltigt val. Testa igen.');
@@ -386,7 +390,7 @@ Future<void> deleteVehicleHandler() async {
         await vehicleRepository.getByRegistrationNumber(registrationInput);
 
     if (vehicle != false) {
-      vehicleRepository.deleteItem(vehicle);
+      vehicleRepository.delete(vehicle.registrationNumber);
       break;
     }
     print('Ogiltigt val. Testa igen.');
@@ -397,12 +401,13 @@ Future<void> deleteParkingSpaceHandler() async {
   while (true) {
     String addressInput =
         inputHandler('Fyll i adressen för den parkeringsplats du vill ta bort');
-    final respositoryItems = await parkingSpaceRepository.getItems;
+    final repositoryItems = await parkingSpaceRepository.getAll();
 
-    if (respositoryItems
+    if (repositoryItems
         .any((parkingSpace) => parkingSpace.address == addressInput)) {
-      parkingSpaceRepository.deleteItem(respositoryItems
-          .firstWhere((parkingSpace) => parkingSpace.address == addressInput));
+      parkingSpaceRepository.delete(repositoryItems
+          .firstWhere((parkingSpace) => parkingSpace.address == addressInput)
+          .address);
       break;
     }
     print('Ogiltigt val. Testa igen.');
@@ -415,7 +420,7 @@ Future<void> deleteParkingHandler() async {
         inputHandler('Fyll i id för den parkering du vill ta bort');
     final parking = await parkingRepository.getById(idInput);
     if (parking != false) {
-      parkingRepository.deleteItem(parking);
+      parkingRepository.delete(parking.id);
       break;
     }
     print('Ogiltigt val. Testa igen.');
