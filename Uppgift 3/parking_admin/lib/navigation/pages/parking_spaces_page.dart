@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:parking_admin/widgets/cards/grid_cell_card.dart';
+import 'package:parking_shared/parking_shared.dart';
 
 import '../../widgets/buttons/grid_cell_button.dart';
 
@@ -8,6 +9,7 @@ class ParkingSpacesPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    ParkingSpace parkingSpace = ParkingSpace('arkiv 123', 12, 'fwef-3412424');
     openDialog() => print('wqfqfx');
     return Padding(
       padding: const EdgeInsets.all(8.0),
@@ -21,9 +23,9 @@ class ParkingSpacesPage extends StatelessWidget {
             text: 'Lägg till parkeringsplats',
             onButtonPressed: openDialog,
           ),
-          const GridCellCard(
-            title: 'parking space 1',
-            text: 'This is a parking space',
+          GridCellCard(
+            title: parkingSpace.address,
+            text: parkingSpace.price.toString(),
           ),
           const GridCellCard(
             title: 'parking space 2',
