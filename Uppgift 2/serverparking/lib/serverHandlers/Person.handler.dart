@@ -1,55 +1,81 @@
 import 'dart:convert';
 import 'package:shelf/shelf.dart';
 import 'package:serverparking_shared/serverparking_shared.dart';
-import 'Parking.handler.dart';
+
+import '../repositories/Person.repository.dart';
+
+final personRepository = PersonRepository();
 
 // POST
 Future<Response> postPersonHandler(Request request) async {
   final data = await request.readAsString();
   final json = jsonDecode(data);
-  final person = Person.fromJSON(json);
+  var person = Person.fromJSON(json);
 
-  personRepository.add(person);
+  person = await personRepository.add(person);
 
-  return Response.ok(null);
+  try {
+    return Response.ok(
+      jsonEncode(person.toJSON()),
+      headers: {'Content-Type': 'application/json'},
+    );
+  } catch (e) {
+    return Response.internalServerError();
+  }
 }
 
 // GET ALL
 Future<Response> getAllPersonsHandler(Request request) async {
   final persons = await personRepository.getAll();
-  return Response.ok(
-    jsonEncode(persons.map((person) => person.toJSON()).toList()),
-    headers: {'Content-Type': 'application/json'},
-  );
+  try {
+    return Response.ok(
+      jsonEncode(persons.map((person) => person.toJSON()).toList()),
+      headers: {'Content-Type': 'application/json'},
+    );
+  } catch (e) {
+    return Response.notFound('Persons not found');
+  }
 }
 
 // GET
-Future<Response> getPersonHandler(Request request, int personalNumber) async {
-  final person = await personRepository.getByPersonalNumber(personalNumber);
-  return Response.ok(
-    jsonEncode(person),
-    headers: {'Content-Type': 'application/json'},
-  );
+Future<Response> getPersonHandler(Request request, String id) async {
+  final person = await personRepository.getById(id);
+  if (person != null) {
+    return Response.ok(
+      jsonEncode(person.toJSON()),
+      headers: {'Content-Type': 'application/json'},
+    );
+  } else {
+    return Response.notFound('No person matching $id');
+  }
 }
 
 // UPDATE
-Future<Response> updatePersonHandler(Request request, Person person) async {
+Future<Response> updatePersonHandler(Request request, String id) async {
   final data = await request.readAsString();
   final json = jsonDecode(data);
   final updatedPerson = Person.fromJSON(json);
 
   try {
-    personRepository.update(person.personalNumber.toString(), updatedPerson);
-    return Response.ok('Person updated successfully');
+    var updated = await personRepository.update(id, updatedPerson);
+    if (updated != null) {
+      return Response.ok(
+        jsonEncode(updated.toJSON()),
+        headers: {'Content-Type': 'application/json'},
+      );
+    } else {
+      return Response.internalServerError(
+          body: {"message": "failed db update"});
+    }
   } catch (e) {
     return Response.notFound('Person not found');
   }
 }
 
 // DELETE
-Future<Response> deletePersonHandler(Request request, Person person) async {
+Future<Response> deletePersonHandler(Request request, String id) async {
   try {
-    personRepository.delete(person.personalNumber);
+    personRepository.delete(id);
     return Response.ok('Person deleted successfully');
   } catch (e) {
     return Response.notFound('Person not found');

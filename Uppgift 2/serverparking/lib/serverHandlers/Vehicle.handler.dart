@@ -1,57 +1,80 @@
 import 'dart:convert';
 import 'package:shelf/shelf.dart';
 import 'package:serverparking_shared/serverparking_shared.dart';
-import 'Parking.handler.dart';
+import '../repositories/Vehicle.repository.dart';
+
+final vehicleRepository = VehicleRepository();
 
 // POST
 Future<Response> postVehicleHandler(Request request) async {
   final data = await request.readAsString();
   final json = jsonDecode(data);
-  final vehicle = Vehicle.fromJSON(json);
+  var vehicle = Vehicle.fromJSON(json);
 
-  vehicleRepository.add(vehicle);
+  vehicle = await vehicleRepository.add(vehicle);
 
-  return Response.ok(null);
+  try {
+    return Response.ok(
+      jsonEncode(vehicle.toJSON()),
+      headers: {'Content-Type': 'application/json'},
+    );
+  } catch (e) {
+    return Response.internalServerError();
+  }
 }
 
 // GET ALL
 Future<Response> getAllVehiclesHandler(Request request) async {
   final vehicles = await vehicleRepository.getAll();
-  return Response.ok(
-    jsonEncode(vehicles.map((vehicle) => vehicle.toJSON()).toList()),
-    headers: {'Content-Type': 'application/json'},
-  );
+  try {
+    return Response.ok(
+      jsonEncode(vehicles.map((vehicle) => vehicle.toJSON()).toList()),
+      headers: {'Content-Type': 'application/json'},
+    );
+  } catch (e) {
+    return Response.notFound('Vehicles not found');
+  }
 }
 
 // GET
-Future<Response> getVehicleHandler(
-    Request request, String registrationNumber) async {
-  final vehicle =
-      await vehicleRepository.getByRegistrationNumber(registrationNumber);
-  return Response.ok(
-    jsonEncode(vehicle),
-    headers: {'Content-Type': 'application/json'},
-  );
+Future<Response> getVehicleHandler(Request request, String id) async {
+  final vehicle = await vehicleRepository.getById(id);
+  if (vehicle != null) {
+    return Response.ok(
+      jsonEncode(vehicle.toJSON()),
+      headers: {'Content-Type': 'application/json'},
+    );
+  } else {
+    return Response.notFound('No vehicle matching $id');
+  }
 }
 
 // UPDATE
-Future<Response> updateVehicleHandler(Request request, Vehicle vehicle) async {
+Future<Response> updateVehicleHandler(Request request, String id) async {
   final data = await request.readAsString();
   final json = jsonDecode(data);
   final updatedVehicle = Vehicle.fromJSON(json);
 
   try {
-    vehicleRepository.update(vehicle.registrationNumber, updatedVehicle);
-    return Response.ok('Vehicle updated successfully');
+    var updated = await vehicleRepository.update(id, updatedVehicle);
+    if (updated != null) {
+      return Response.ok(
+        jsonEncode(updated.toJSON()),
+        headers: {'Content-Type': 'application/json'},
+      );
+    } else {
+      return Response.internalServerError(
+          body: {"message": "Failed db update"});
+    }
   } catch (e) {
     return Response.notFound('Vehicle not found');
   }
 }
 
 // DELETE
-Future<Response> deleteVehicleHandler(Request request, Vehicle vehicle) async {
+Future<Response> deleteVehicleHandler(Request request, String id) async {
   try {
-    vehicleRepository.delete(vehicle.registrationNumber);
+    vehicleRepository.delete(id);
     return Response.ok('Vehicle deleted successfully');
   } catch (e) {
     return Response.notFound('Vehicle not found');

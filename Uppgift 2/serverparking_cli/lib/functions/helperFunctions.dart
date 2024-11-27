@@ -58,15 +58,16 @@ Future<void> searchForVehiclesByOwner() async {
   String personalNumberAsString = inputHandler('Sök på en ägares personnummer');
   int? ownerPersonalNumber = int.tryParse(personalNumberAsString);
   if (ownerPersonalNumber == null ||
-      !persons.any((person) => person.personalNumber == ownerPersonalNumber))
+      !persons.any((person) => person.personalNumber == ownerPersonalNumber)) {
     print('Ingen ägare med det personnumret existerar');
-  else if (vehicles
-      .any((vehicle) => vehicle.owner.personalNumber == ownerPersonalNumber))
+  } else if (vehicles
+      .any((vehicle) => vehicle.owner.personalNumber == ownerPersonalNumber)) {
     print(vehicles
         .where((vehicle) => vehicle.owner.personalNumber == ownerPersonalNumber)
         .toString());
-  else
+  } else {
     print('Inga fordon funna för personnummer: $personalNumberAsString');
+  }
 }
 
 Future<void> searchForParkingsByVehicle() async {
@@ -81,6 +82,7 @@ Future<void> searchForParkingsByVehicle() async {
         .toString();
     print('''Parkeringar för fordon $registrationNumber:
     $parkings''');
-  } else
+  } else {
     print('Inga parkeringar existerar på fordonet $registrationNumber');
+  }
 }

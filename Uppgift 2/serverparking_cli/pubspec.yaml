@@ -11,6 +11,7 @@ publish_to: none
 # Add regular dependencies here.
 dependencies:
   http: ^1.2.2
+  firebase_dart: ^1.2.2
   # path: ^1.8.0
   serverparking_shared:
     path: ../serverparking_shared

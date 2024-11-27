@@ -127,7 +127,7 @@ packages:
     source: hosted
     version: "7.0.1"
   firebase_dart:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: firebase_dart
       sha256: ac50536c0346a41ebcd47e656ea10bfbcc101213528551293ff2729d3d1c718a

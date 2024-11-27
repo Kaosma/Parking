@@ -3,20 +3,24 @@ import 'package:serverparking/serverHandlers/router.config.dart';
 import 'package:serverparking_shared/serverparking_shared.dart';
 
 class ParkingSpaceRepository implements RepositoryInterface<ParkingSpace> {
-  final String baseUrl =
-      'https://serverparking-9de55-default-rtdb.europe-west1.firebasedatabase.app/';
   DatabaseReference database = FirebaseDatabase(app: RouterConfig.instance.app)
       .reference()
       .child("parkingSpaces");
 
   @override
   Future<ParkingSpace> add(ParkingSpace parkingSpace) async {
-    database.push().set(parkingSpace);
-    return parkingSpace;
+    try {
+      await database.child('/${parkingSpace.id}').set(parkingSpace.toJSON());
+      return parkingSpace;
+    } on Exception catch (e) {
+      print(e);
+      return parkingSpace;
+    }
   }
 
-  Future<ParkingSpace?> getByAddress(String address) async {
-    DataSnapshot snapshot = await database.child('/$address').once();
+  @override
+  Future<ParkingSpace?> getById(String id) async {
+    DataSnapshot snapshot = await database.child('/$id').once();
 
     if (snapshot.value != null) {
       Map<String, dynamic> parkingSpace =
@@ -55,7 +59,8 @@ class ParkingSpaceRepository implements RepositoryInterface<ParkingSpace> {
     }
   }
 
-  Future<void> delete(String address) async {
-    await database.child('/$address').remove();
+  @override
+  Future<void> delete(String id) async {
+    await database.child('/$id').remove();
   }
 }

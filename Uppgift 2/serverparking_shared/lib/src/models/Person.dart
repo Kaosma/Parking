@@ -1,24 +1,24 @@
-import 'package:serverparking_shared/src/helpers/generateUuid.dart';
+import 'package:serverparking_shared/src/helpers/generate_uuid.dart';
 
 class Person {
-  String id;
   String name;
   int personalNumber;
+  String id;
   Person(this.name, this.personalNumber, [String? id])
       : id = id ?? generateUuid();
 
   Map<String, dynamic> toJSON() {
     return {
-      'id': id,
       'name': name,
       'personalNumber': personalNumber,
+      'id': id,
     };
   }
 
   factory Person.fromJSON(Map<String, dynamic> json) {
-    return Person(json['id'], json['name'], json['personalNumber']);
+    return Person(json['name'], json['personalNumber'], json['id']);
   }
 
   @override
-  String toString() => '[Namn: $name, Personnummer: $personalNumber]';
+  String toString() => '[Id: $id, Namn: $name, Personnummer: $personalNumber]';
 }

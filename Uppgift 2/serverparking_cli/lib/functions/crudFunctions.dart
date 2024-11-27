@@ -22,7 +22,7 @@ Future<void> createPersonHandler() async {
     int? personalNumber = int.tryParse(input);
 
     if (personalNumber != null) {
-      personRepository.add(Person(nameInput, personalNumber));
+      await personRepository.add(Person(nameInput, personalNumber));
       break;
     }
     print('Ogiltigt val. Testa igen.');
@@ -37,16 +37,11 @@ Future<void> createVehicleHandler() async {
   }
 
   String typeInput = inputHandler('Fyll i fordonstyp');
-
   while (true) {
-    String input = inputHandler('Fyll i en ägares personnummer');
-
-    int? personalNumber = int.tryParse(input);
-
-    if (personalNumber != null &&
-        await personRepository.getByPersonalNumber(personalNumber) != false) {
-      Person owner = await personRepository.getByPersonalNumber(personalNumber);
-      vehicleRepository.add(Vehicle(registrationInput, typeInput, owner));
+    String idInput = inputHandler('Fyll i en ägares id');
+    final owner = await personRepository.getById(idInput);
+    if (owner != null) {
+      await vehicleRepository.add(Vehicle(registrationInput, typeInput, owner));
       break;
     }
     print('Ogiltigt val. Testa igen.');
@@ -62,7 +57,7 @@ Future<void> createParkingSpaceHandler() async {
     int? price = int.tryParse(input);
 
     if (price != null) {
-      parkingSpaceRepository.add(ParkingSpace(addressInput, price));
+      await parkingSpaceRepository.add(ParkingSpace(addressInput, price));
       break;
     }
     print('Ogiltigt val. Testa igen.');
@@ -70,32 +65,10 @@ Future<void> createParkingSpaceHandler() async {
 }
 
 Future<void> createParkingHandler() async {
-  String registrationNumber;
-  String address;
   int startTime;
   int endTime;
-  while (true) {
-    String registrationInput =
-        inputHandler('Fyll i fordonets registreringsnummer');
-
-    if (vehicleRepository.getByRegistrationNumber(registrationInput) != false) {
-      registrationNumber = registrationInput;
-      break;
-    }
-
-    print('Ogiltigt val. Testa igen.');
-  }
-
-  while (true) {
-    String addressInput = inputHandler('Fyll i parkeringsplatsens adress');
-
-    if (parkingSpaceRepository.getByAddress(addressInput) != false) {
-      address = addressInput;
-      break;
-    }
-
-    print('Ogiltigt val. Testa igen.');
-  }
+  String vehicleId = inputHandler('Fyll i fordonets id');
+  String parkingSpaceId = inputHandler('Fyll i parkeringsplatsens id');
 
   while (true) {
     String input = inputHandler('Fyll i parkeringens starttid');
@@ -120,15 +93,16 @@ Future<void> createParkingHandler() async {
     }
     print('Ogiltigt val. Testa igen.');
   }
-  Vehicle vehicle =
-      await vehicleRepository.getByRegistrationNumber(registrationNumber);
-  ParkingSpace parkingSpace =
-      await parkingSpaceRepository.getByAddress(address);
-  parkingRepository.add(Parking(
-      vehicle: vehicle,
-      parkingSpace: parkingSpace,
-      startTime: startTime,
-      endTime: endTime));
+  final vehicle = await vehicleRepository.getById(vehicleId);
+  final parkingSpace = await parkingSpaceRepository.getById(parkingSpaceId);
+
+  if (vehicle != null && parkingSpace != null) {
+    parkingRepository.add(Parking(
+        vehicle: vehicle,
+        parkingSpace: parkingSpace,
+        startTime: startTime,
+        endTime: endTime));
+  }
 }
 
 // READ
@@ -158,94 +132,76 @@ Future<void> getAllParkingsHandler() async {
 
 // UPDATE
 Future<void> updatePersonHandler() async {
-  int personalNumberToUpdate;
-  while (true) {
-    String input =
-        inputHandler('Fyll i personnummer på den person du vill uppdatera');
+  String idInput = inputHandler('Fyll i id på den person du vill uppdatera');
+  Person newPerson;
+  final personToUpdate = await personRepository.getById(idInput);
 
-    int? personalNumber = int.tryParse(input);
+  if (personToUpdate != null) {
+    newPerson = personToUpdate;
 
-    if (personalNumber != null &&
-        personRepository.getByPersonalNumber(personalNumber) != false) {
-      personalNumberToUpdate = personalNumber;
-      break;
+    print(
+        'Fyll i nya uppgifter för personen du vill uppdatera. Eller skriv ".samma." om du inte vill ändra den uppgiften.');
+    while (true) {
+      String input = inputHandler('Uppdatera personnummer');
+
+      if (input == '.samma.') {
+        break;
+      }
+
+      int? personalNumber = int.tryParse(input);
+
+      if (personalNumber != null) {
+        newPerson.personalNumber = personalNumber;
+        break;
+      }
+      print('Ogiltigt val. Testa igen.');
     }
-    print('Invalid input. Try again:');
+    String nameInput = inputHandler('Uppdatera namn');
+
+    if (nameInput != '.samma.') newPerson.name = nameInput;
+    if (newPerson != false) {
+      await personRepository.update(idInput, newPerson);
+    }
   }
-  Person personToUpdate =
-      await personRepository.getByPersonalNumber(personalNumberToUpdate);
-  Person newPerson = personToUpdate;
-
-  print(
-      'Fyll i nya uppgifter för personen du vill uppdatera. Eller skriv ".samma." om du inte vill ändra den uppgiften.');
-  while (true) {
-    String input = inputHandler('Uppdatera personnummer');
-
-    if (input == '.samma.') {
-      break;
-    }
-
-    int? personalNumber = int.tryParse(input);
-
-    if (personalNumber != null) {
-      newPerson.personalNumber = personalNumber;
-      break;
-    }
-    print('Ogiltigt val. Testa igen.');
-  }
-  String nameInput = inputHandler('Uppdatera namn');
-
-  if (nameInput != '.samma.') newPerson.name = nameInput;
-  personRepository.update(personToUpdate.id, newPerson);
 }
 
 Future<void> updateVehicleHandler() async {
-  String registrationNumberToUpdate;
-  while (true) {
-    String registrationInput = inputHandler(
-        'Fyll i registreringsnummer på det fordon du vill uppdatera');
+  String idInput = inputHandler('Fyll i id på det fordon du vill uppdatera');
+  final newVehicle = await vehicleRepository.getById(idInput);
 
-    if (vehicleRepository.getByRegistrationNumber(registrationInput) != false) {
-      registrationNumberToUpdate = registrationInput;
-      break;
-    }
-    print('Ogiltigt val. Testa igen.');
-  }
-  Vehicle newVehicle = await vehicleRepository
-      .getByRegistrationNumber(registrationNumberToUpdate);
-  ;
-
-  print(
-      'Fyll i nya uppgifter för fordonet du vill uppdatera. Eller skriv ".samma." om du inte vill ändra den uppgiften.');
-  String registrationInput;
-  while (true) {
-    registrationInput = inputHandler('Uppdatera registreringsnummer');
-    if (registrationNumberExpressionValid.hasMatch(registrationInput)) break;
-  }
-
-  if (registrationInput != '.samma.')
-    newVehicle.registrationNumber = registrationInput;
-
-  String typeInput = inputHandler('Uppdatera bilmärke');
-
-  if (typeInput != '.samma.') newVehicle.type = typeInput;
-
-  while (true) {
-    String input = inputHandler('Uppdatera ägare (personnummer)');
-
-    if (input == '.samma.') {
-      break;
+  if (newVehicle != null) {
+    print(
+        'Fyll i nya uppgifter för fordonet du vill uppdatera. Eller skriv ".samma." om du inte vill ändra den uppgiften.');
+    String registrationInput;
+    while (true) {
+      registrationInput = inputHandler('Uppdatera registreringsnummer');
+      if (registrationNumberExpressionValid.hasMatch(registrationInput)) break;
     }
 
-    int? personalNumber = int.tryParse(input);
-
-    if (personalNumber != null &&
-        await personRepository.getByPersonalNumber(personalNumber) != false) {
-      newVehicle.owner =
-          await personRepository.getByPersonalNumber(personalNumber);
-      break;
+    if (registrationInput != '.samma.') {
+      newVehicle.registrationNumber = registrationInput;
     }
-    print('Ogiltigt val. Testa igen.');
+
+    String typeInput = inputHandler('Uppdatera fordonstyp');
+
+    if (typeInput != '.samma.') newVehicle.type = typeInput;
+
+    while (true) {
+      String idInput = inputHandler('Uppdatera ägare (id)');
+
+      if (idInput == '.samma.') {
+        break;
+      }
+
+      final newOwner = await personRepository.getById(idInput);
+      if (newOwner != null) {
+        newVehicle.owner = newOwner;
+        break;
+      }
+      print('Ogiltigt val. Testa igen.');
+
+      await vehicleRepository.update(idInput, newVehicle);
+    }
   }
 }
 
@@ -286,6 +242,7 @@ Future<void> updateParkingSpaceHandler() async {
     }
     print('Ogiltigt val. Testa igen.');
   }
+  await parkingSpaceRepository.update(idToUpdate, newParkingSpace);
 }
 
 Future<void> updateParkingHandler() async {
@@ -300,129 +257,92 @@ Future<void> updateParkingHandler() async {
     }
     print('Ogiltigt val. Testa igen.');
   }
-  Parking parkingToUpdate = await parkingRepository.getById(idToUpdate);
-  Parking newParking = parkingToUpdate;
+  final parkingToUpdate = await parkingRepository.getById(idToUpdate);
+  if (parkingToUpdate != null) {
+    Parking newParking = parkingToUpdate;
 
-  print(
-      'Fyll i nya uppgifter för parkeringsplatsen du vill uppdatera. Eller skriv ".samma." om du inte vill ändra den uppgiften.');
-  while (true) {
-    String registrationInput =
-        inputHandler('Uppdatera fordon (registreringsnummer)');
-    if (registrationInput == '.samma.') {
-      break;
-    }
-    if (vehicleRepository.getByRegistrationNumber(registrationInput) != false) {
-      newParking.vehicle =
-          await vehicleRepository.getByRegistrationNumber(registrationInput);
-      break;
-    }
-    print('Ogiltigt val. Testa igen.');
-  }
-
-  while (true) {
-    String idInput = inputHandler('Uppdatera parkeringsplats (id)');
-    if (idInput == '.samma.') {
-      break;
-    }
-    final repositoryItems = await parkingSpaceRepository.getAll();
-    if (repositoryItems.any((parkingSpace) => parkingSpace.id == idInput)) {
-      newParking.parkingSpace = repositoryItems
-          .firstWhere((parkingSpace) => parkingSpace.id == idInput);
-      break;
-    }
-    print('Ogiltigt val. Testa igen.');
-  }
-
-  while (true) {
-    String input = inputHandler('Uppdatera starttid (unix timestamp)');
-
-    if (input == '.samma.') {
-      break;
+    print(
+        'Fyll i nya uppgifter för parkeringsplatsen du vill uppdatera. Eller skriv ".samma." om du inte vill ändra den uppgiften.');
+    while (true) {
+      String vehicleIdInput = inputHandler('Uppdatera fordon (id)');
+      if (vehicleIdInput == '.samma.') {
+        break;
+      }
+      final vehicle = await vehicleRepository.getById(vehicleIdInput);
+      if (vehicle != null) {
+        newParking.vehicle = vehicle;
+        break;
+      }
+      print('Ogiltigt val. Testa igen.');
     }
 
-    int? startTime = int.tryParse(input);
-
-    if (startTime != null) {
-      newParking.startTime = startTime;
-      break;
-    }
-    print('Ogiltigt val. Testa igen.');
-  }
-
-  while (true) {
-    String input = inputHandler('Uppdatera sluttid (unix timestamp)');
-
-    if (input == '.samma.') {
-      break;
+    while (true) {
+      String idInput = inputHandler('Uppdatera parkeringsplats (id)');
+      if (idInput == '.samma.') {
+        break;
+      }
+      final repositoryItems = await parkingSpaceRepository.getAll();
+      if (repositoryItems.any((parkingSpace) => parkingSpace.id == idInput)) {
+        newParking.parkingSpace = repositoryItems
+            .firstWhere((parkingSpace) => parkingSpace.id == idInput);
+        break;
+      }
+      print('Ogiltigt val. Testa igen.');
     }
 
-    int? endTimeInput = int.tryParse(input);
+    while (true) {
+      String input = inputHandler('Uppdatera starttid (unix timestamp)');
 
-    if (endTimeInput != null && endTimeInput >= newParking.startTime) {
-      newParking.endTime = endTimeInput;
-      break;
+      if (input == '.samma.') {
+        break;
+      }
+
+      int? startTime = int.tryParse(input);
+
+      if (startTime != null) {
+        newParking.startTime = startTime;
+        break;
+      }
+      print('Ogiltigt val. Testa igen.');
     }
-    print('Ogiltigt val. Testa igen.');
+
+    while (true) {
+      String input = inputHandler('Uppdatera sluttid (unix timestamp)');
+
+      if (input == '.samma.') {
+        break;
+      }
+
+      int? endTimeInput = int.tryParse(input);
+
+      if (endTimeInput != null && endTimeInput >= newParking.startTime) {
+        newParking.endTime = endTimeInput;
+        break;
+      }
+      print('Ogiltigt val. Testa igen.');
+    }
+    await parkingRepository.update(idToUpdate, newParking);
   }
 }
 
 // DELETE
 Future<void> deletePersonHandler() async {
-  while (true) {
-    String input =
-        inputHandler('Fyll i personnummer på den person du vill ta bort');
-
-    int? personalNumber = int.tryParse(input);
-    if (personalNumber != null &&
-        await personRepository.getByPersonalNumber(personalNumber) != false) {
-      personRepository.delete(personalNumber);
-      break;
-    }
-    print('Ogiltigt val. Testa igen.');
-  }
+  String input = inputHandler('Fyll i id på den person du vill ta bort');
+  await personRepository.delete(input);
 }
 
 Future<void> deleteVehicleHandler() async {
-  while (true) {
-    String registrationInput = inputHandler(
-        'Fyll i registreringsnummer på det fordon du vill ta bort');
-    final vehicle =
-        await vehicleRepository.getByRegistrationNumber(registrationInput);
-
-    if (vehicle != false) {
-      vehicleRepository.delete(vehicle.registrationNumber);
-      break;
-    }
-    print('Ogiltigt val. Testa igen.');
-  }
+  String input = inputHandler('Fyll i id på det fordon du vill ta bort');
+  await vehicleRepository.delete(input);
 }
 
 Future<void> deleteParkingSpaceHandler() async {
-  while (true) {
-    String addressInput =
-        inputHandler('Fyll i adressen för den parkeringsplats du vill ta bort');
-    final repositoryItems = await parkingSpaceRepository.getAll();
-
-    if (repositoryItems
-        .any((parkingSpace) => parkingSpace.address == addressInput)) {
-      parkingSpaceRepository.delete(repositoryItems
-          .firstWhere((parkingSpace) => parkingSpace.address == addressInput)
-          .address);
-      break;
-    }
-    print('Ogiltigt val. Testa igen.');
-  }
+  String input =
+      inputHandler('Fyll i id på den parkeringsplats du vill ta bort');
+  await parkingSpaceRepository.delete(input);
 }
 
 Future<void> deleteParkingHandler() async {
-  while (true) {
-    String idInput =
-        inputHandler('Fyll i id för den parkering du vill ta bort');
-    final parking = await parkingRepository.getById(idInput);
-    if (parking != false) {
-      parkingRepository.delete(parking.id);
-      break;
-    }
-    print('Ogiltigt val. Testa igen.');
-  }
+  String input = inputHandler('Fyll i id på den parkering du vill ta bort');
+  await parkingRepository.delete(input);
 }

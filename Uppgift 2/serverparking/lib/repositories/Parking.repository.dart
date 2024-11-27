@@ -3,16 +3,19 @@ import 'package:serverparking/serverHandlers/router.config.dart';
 import 'package:serverparking_shared/serverparking_shared.dart';
 
 class ParkingRepository implements RepositoryInterface<Parking> {
-  final String baseUrl =
-      'https://serverparking-9de55-default-rtdb.europe-west1.firebasedatabase.app/';
   DatabaseReference database = FirebaseDatabase(app: RouterConfig.instance.app)
       .reference()
       .child("parkings");
 
   @override
   Future<Parking> add(Parking parking) async {
-    database.push().set(parking);
-    return parking;
+    try {
+      await database.child('/${parking.id}').set(parking.toJSON());
+      return parking;
+    } on Exception catch (e) {
+      print(e);
+      return parking;
+    }
   }
 
   Future<Parking?> getById(String id) async {
