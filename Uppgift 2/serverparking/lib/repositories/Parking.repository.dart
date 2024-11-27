@@ -56,6 +56,7 @@ class ParkingRepository implements RepositoryInterface<Parking> {
     }
   }
 
+  @override
   Future<void> delete(String id) async {
     await database.child('/$id').remove();
   }
