@@ -1,22 +1,26 @@
 import 'package:firebase_dart/database.dart';
-import 'package:serverparking/serverHandlers/router.config.dart';
 import 'package:parking_shared/parking_shared.dart';
+import '../serverHandlers/router.config.dart';
 
 class VehicleRepository implements RepositoryInterface<Vehicle> {
-  final String baseUrl =
-      'https://serverparking-9de55-default-rtdb.europe-west1.firebasedatabase.app/';
   DatabaseReference database = FirebaseDatabase(app: RouterConfig.instance.app)
       .reference()
       .child("vehicles");
 
   @override
   Future<Vehicle> add(Vehicle vehicle) async {
-    database.push().set(vehicle);
-    return vehicle;
+    try {
+      await database.child('/${vehicle.id}').set(vehicle.toJSON());
+      return vehicle;
+    } on Exception catch (e) {
+      print(e);
+      return vehicle;
+    }
   }
 
-  Future<Vehicle?> getByRegistrationNumber(String registrationNumber) async {
-    DataSnapshot snapshot = await database.child('/$registrationNumber').once();
+  @override
+  Future<Vehicle?> getById(String id) async {
+    DataSnapshot snapshot = await database.child('/$id').once();
 
     if (snapshot.value != null) {
       Map<String, dynamic> vehicle =
@@ -44,16 +48,17 @@ class VehicleRepository implements RepositoryInterface<Vehicle> {
   }
 
   @override
-  Future<Vehicle?> update(String registrationNumber, Vehicle newVehicle) async {
+  Future<Vehicle?> update(String id, Vehicle newVehicle) async {
     try {
-      await database.child('/$registrationNumber').update(newVehicle.toJSON());
+      await database.child('/$id').update(newVehicle.toJSON());
       return newVehicle;
     } catch (e) {
       return null;
     }
   }
 
-  Future<void> delete(String registrationNumber) async {
-    await database.child('/$registrationNumber').remove();
+  @override
+  Future<void> delete(String id) async {
+    await database.child('/$id').remove();
   }
 }

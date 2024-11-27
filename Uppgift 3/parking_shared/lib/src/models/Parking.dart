@@ -4,11 +4,11 @@ import 'ParkingSpace.dart';
 import 'Vehicle.dart';
 
 class Parking {
-  String id;
   Vehicle vehicle;
   ParkingSpace parkingSpace;
   int startTime;
   int endTime;
+  String id;
   Parking(
       {required this.vehicle,
       required this.parkingSpace,
@@ -24,21 +24,22 @@ class Parking {
 
   Map<String, dynamic> toJSON() {
     return {
-      'id': id,
-      'vehicle': vehicle,
-      'parkingSpace': parkingSpace,
+      'vehicle': vehicle.toJSON(),
+      'parkingSpace': parkingSpace.toJSON(),
       'startTime': startTime,
       'endTime': endTime,
+      'id': id,
     };
   }
 
   factory Parking.fromJSON(Map<String, dynamic> json) {
     return Parking(
-        id: json['id'],
-        vehicle: json['vehicle'],
-        parkingSpace: json['parkingSpace'],
-        startTime: json['startTime'],
-        endTime: json['endTime']);
+      vehicle: Vehicle.fromJSON(json['vehicle']),
+      parkingSpace: ParkingSpace.fromJSON(json['parkingSpace']),
+      startTime: json['startTime'],
+      endTime: json['endTime'],
+      id: json['id'],
+    );
   }
 
   @override
@@ -46,6 +47,6 @@ class Parking {
     String convertedStarttime = convertUnixToDateTime(startTime);
     String convertedEndtime = convertUnixToDateTime(endTime);
     int parkingPrice = calculateParkingPrice();
-    return '[$id, $vehicle, $parkingSpace, $convertedStarttime-$convertedEndtime, Parking price: $parkingPrice kr]';
+    return '[Id: $id, Fordon: $vehicle, Plats: $parkingSpace, Tid: $convertedStarttime-$convertedEndtime, Parking price: $parkingPrice kr]';
   }
 }

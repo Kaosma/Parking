@@ -22,38 +22,41 @@ class RouterConfig {
         projectId: "serverparking-9de55",
         storageBucket: "serverparking-9de55.firebasestorage.app",
         messagingSenderId: "1059671592375",
-        appId: "1:1059671592375:web:9492d6deb0dc3cff84ec32");
+        appId: "1:1059671592375:web:9492d6deb0dc3cff84ec32",
+        databaseURL:
+            'https://serverparking-9de55-default-rtdb.europe-west1.firebasedatabase.app/');
 
+    FirebaseDart.setup();
     app = await Firebase.initializeApp(options: options);
 
     router = Router()
       // Person routes
-      ..post('/person', postPersonHandler)
+      ..post('/persons', postPersonHandler)
       ..get('/persons', getAllPersonsHandler)
-      ..get('/person/<personalNumber>', getPersonHandler)
-      ..put('/person/<personalNumber>', updatePersonHandler)
-      ..delete('/person/<personalNumber>', deletePersonHandler)
+      ..get('/persons/<id>', getPersonHandler)
+      ..put('/persons/<id>', updatePersonHandler)
+      ..delete('/persons/<id>', deletePersonHandler)
 
       // Vehicle routes
-      ..post('/vehicle', postVehicleHandler)
+      ..post('/vehicles', postVehicleHandler)
       ..get('/vehicles', getAllVehiclesHandler)
-      ..get('/vehicle/<registrationNumber>', getVehicleHandler)
-      ..put('/vehicle/<registrationNumber>', updateVehicleHandler)
-      ..delete('/vehicle/<registrationNumber>', deleteVehicleHandler)
+      ..get('/vehicles/<id>', getVehicleHandler)
+      ..put('/vehicles/<id>', updateVehicleHandler)
+      ..delete('/vehicles/<id>', deleteVehicleHandler)
 
       // ParkingSpace routes
-      ..post('/parking-space', postParkingSpaceHandler)
+      ..post('/parking-spaces', postParkingSpaceHandler)
       ..get('/parking-spaces', getAllParkingSpacesHandler)
-      ..get('/parking-space/<address>', getParkingSpaceHandler)
-      ..put('/parking-space/<address>', updateParkingSpaceHandler)
-      ..delete('/parking-space/<address>', deleteParkingSpaceHandler)
+      ..get('/parking-spaces/<id>', getParkingSpaceHandler)
+      ..put('/parking-spaces/<id>', updateParkingSpaceHandler)
+      ..delete('/parking-spaces/<id>', deleteParkingSpaceHandler)
 
       // Parking routes
-      ..post('/parking', postParkingHandler)
+      ..post('/parkings', postParkingHandler)
       ..get('/parkings', getAllParkingsHandler)
-      ..get('/parking/<id>', getParkingHandler)
-      ..put('/parking/<id>', updateParkingHandler)
-      ..delete('/parking/<id>', deleteParkingHandler);
+      ..get('/parkings/<id>', getParkingHandler)
+      ..put('/parkings/<id>', updateParkingHandler)
+      ..delete('/parkings/<id>', deleteParkingHandler);
     return router;
   }
 }

@@ -2,28 +2,28 @@ import '../helpers/generateUuid.dart';
 import 'Person.dart';
 
 class Vehicle {
-  String id;
   String registrationNumber;
   String type;
   Person owner;
+  String id;
   Vehicle(this.registrationNumber, this.type, this.owner, [String? id])
       : id = id ?? generateUuid();
 
   Map<String, dynamic> toJSON() {
     return {
-      'id': id,
       'registrationNumber': registrationNumber,
       'type': type,
-      'owner': owner,
+      'owner': owner.toJSON(),
+      'id': id,
     };
   }
 
   factory Vehicle.fromJSON(Map<String, dynamic> json) {
-    return Vehicle(
-        json['id'], json['registrationNumber'], json['type'], json['owner']);
+    return Vehicle(json['registrationNumber'], json['type'],
+        Person.fromJSON(json['owner']), json['id']);
   }
 
   @override
   String toString() =>
-      '[Registreringsnummber: $registrationNumber, Fordonstyp: $type, Ägare: $owner]';
+      '[Id: $id, Registreringsnummber: $registrationNumber, Fordonstyp: $type, Ägare: $owner]';
 }

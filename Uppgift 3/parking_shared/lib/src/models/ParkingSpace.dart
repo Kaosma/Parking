@@ -1,24 +1,24 @@
 import '../helpers/generateUuid.dart';
 
 class ParkingSpace {
-  String id;
   String address;
   int price;
+  String id;
   ParkingSpace(this.address, this.price, [String? id])
       : id = id ?? generateUuid();
 
   Map<String, dynamic> toJSON() {
     return {
-      'id': id,
       'address': address,
       'price': price,
+      'id': id,
     };
   }
 
   factory ParkingSpace.fromJSON(Map<String, dynamic> json) {
-    return ParkingSpace(json['id'], json['address'], json['price']);
+    return ParkingSpace(json['address'], json['price'], json['id']);
   }
 
   @override
-  String toString() => '[$id, $address, $price kr per timme]';
+  String toString() => '[Id: $id, Adress: $address, $price kr per timme]';
 }
