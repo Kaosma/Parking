@@ -1,5 +1,5 @@
-import '../helpers/convertUnixToDateTime.dart';
-import '../helpers/generateUuid.dart';
+import '../helpers/functions/convertUnixToDateTime.dart';
+import '../helpers/functions/generateUuid.dart';
 import 'ParkingSpace.dart';
 import 'Vehicle.dart';
 

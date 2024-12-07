@@ -1,11 +1,10 @@
-import 'package:firebase_dart/database.dart';
+import 'dart:convert';
+
 import 'package:parking_shared/parking_shared.dart';
-import '../serverHandlers/router.config.dart';
+import 'package:firebase_database/firebase_database.dart';
 
 class PersonRepository implements RepositoryInterface<Person> {
-  DatabaseReference database = FirebaseDatabase(app: RouterConfig.instance.app)
-      .reference()
-      .child("persons");
+  DatabaseReference database = FirebaseDatabase.instance.ref().child("persons");
 
   @override
   Future<Person> add(Person person) async {
@@ -20,11 +19,11 @@ class PersonRepository implements RepositoryInterface<Person> {
 
   @override
   Future<Person?> getById(String id) async {
-    DataSnapshot snapshot = await database.child('/$id').once();
-
-    if (snapshot.value != null) {
+    DatabaseEvent event = await database.child('/$id').once();
+    if (event.snapshot.value != null) {
+      dynamic personMap = event.snapshot.value;
       Map<String, dynamic> person =
-          Map<String, dynamic>.from(snapshot.value as Map);
+          Map<String, dynamic>.from(json.decode(json.encode(personMap)));
       return Person.fromJSON(person);
     } else {
       return null;
@@ -33,14 +32,14 @@ class PersonRepository implements RepositoryInterface<Person> {
 
   @override
   Future<List<Person>> getAll() async {
-    DataSnapshot snapshot = await database.once();
+    DatabaseEvent event = await database.once();
     List<Person> personsList = [];
 
-    if (snapshot.value != null) {
-      Map<dynamic, dynamic> personsMap =
-          snapshot.value as Map<dynamic, dynamic>;
+    if (event.snapshot.value != null) {
+      dynamic personsMap = event.snapshot.value;
       personsMap.forEach((key, value) {
-        Map<String, dynamic> person = Map<String, dynamic>.from(value as Map);
+        Map<String, dynamic> person =
+            Map<String, dynamic>.from(json.decode(json.encode(value)));
         personsList.add(Person.fromJSON(person));
       });
     }

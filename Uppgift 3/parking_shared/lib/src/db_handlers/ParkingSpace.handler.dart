@@ -1,11 +1,11 @@
-import 'package:firebase_dart/database.dart';
+import 'dart:convert';
+
 import 'package:parking_shared/parking_shared.dart';
-import '../serverHandlers/router.config.dart';
+import 'package:firebase_database/firebase_database.dart';
 
 class ParkingSpaceRepository implements RepositoryInterface<ParkingSpace> {
-  DatabaseReference database = FirebaseDatabase(app: RouterConfig.instance.app)
-      .reference()
-      .child("parkingSpaces");
+  DatabaseReference database =
+      FirebaseDatabase.instance.ref().child("parkingSpaces");
 
   @override
   Future<ParkingSpace> add(ParkingSpace parkingSpace) async {
@@ -20,11 +20,11 @@ class ParkingSpaceRepository implements RepositoryInterface<ParkingSpace> {
 
   @override
   Future<ParkingSpace?> getById(String id) async {
-    DataSnapshot snapshot = await database.child('/$id').once();
-
-    if (snapshot.value != null) {
+    DatabaseEvent event = await database.child('/$id').once();
+    if (event.snapshot.value != null) {
+      dynamic parkingSpaceMap = event.snapshot.value;
       Map<String, dynamic> parkingSpace =
-          Map<String, dynamic>.from(snapshot.value as Map);
+          Map<String, dynamic>.from(json.decode(json.encode(parkingSpaceMap)));
       return ParkingSpace.fromJSON(parkingSpace);
     } else {
       return null;
@@ -33,15 +33,14 @@ class ParkingSpaceRepository implements RepositoryInterface<ParkingSpace> {
 
   @override
   Future<List<ParkingSpace>> getAll() async {
-    DataSnapshot snapshot = await database.once();
+    DatabaseEvent event = await database.once();
     List<ParkingSpace> parkingSpacesList = [];
 
-    if (snapshot.value != null) {
-      Map<dynamic, dynamic> parkingSpacesMap =
-          snapshot.value as Map<dynamic, dynamic>;
+    if (event.snapshot.value != null) {
+      dynamic parkingSpacesMap = event.snapshot.value;
       parkingSpacesMap.forEach((key, value) {
         Map<String, dynamic> parkingSpace =
-            Map<String, dynamic>.from(value as Map);
+            Map<String, dynamic>.from(json.decode(json.encode(value)));
         parkingSpacesList.add(ParkingSpace.fromJSON(parkingSpace));
       });
     }

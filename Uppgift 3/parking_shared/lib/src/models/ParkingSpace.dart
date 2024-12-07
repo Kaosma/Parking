@@ -1,4 +1,4 @@
-import '../helpers/generateUuid.dart';
+import '../helpers/functions/generateUuid.dart';
 
 class ParkingSpace {
   String address;

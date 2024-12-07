@@ -1,11 +1,11 @@
-import 'package:firebase_dart/database.dart';
+import 'dart:convert';
+
 import 'package:parking_shared/parking_shared.dart';
-import '../serverHandlers/router.config.dart';
+import 'package:firebase_database/firebase_database.dart';
 
 class ParkingRepository implements RepositoryInterface<Parking> {
-  DatabaseReference database = FirebaseDatabase(app: RouterConfig.instance.app)
-      .reference()
-      .child("parkings");
+  DatabaseReference database =
+      FirebaseDatabase.instance.ref().child("parkings");
 
   @override
   Future<Parking> add(Parking parking) async {
@@ -20,11 +20,11 @@ class ParkingRepository implements RepositoryInterface<Parking> {
 
   @override
   Future<Parking?> getById(String id) async {
-    DataSnapshot snapshot = await database.child('/$id').once();
-
-    if (snapshot.value != null) {
+    DatabaseEvent event = await database.child('/$id').once();
+    if (event.snapshot.value != null) {
+      dynamic parkingMap = event.snapshot.value;
       Map<String, dynamic> parking =
-          Map<String, dynamic>.from(snapshot.value as Map);
+          Map<String, dynamic>.from(json.decode(json.encode(parkingMap)));
       return Parking.fromJSON(parking);
     } else {
       return null;
@@ -33,14 +33,14 @@ class ParkingRepository implements RepositoryInterface<Parking> {
 
   @override
   Future<List<Parking>> getAll() async {
-    DataSnapshot snapshot = await database.once();
+    DatabaseEvent event = await database.once();
     List<Parking> parkingsList = [];
 
-    if (snapshot.value != null) {
-      Map<dynamic, dynamic> parkingsMap =
-          snapshot.value as Map<dynamic, dynamic>;
+    if (event.snapshot.value != null) {
+      dynamic parkingsMap = event.snapshot.value;
       parkingsMap.forEach((key, value) {
-        Map<String, dynamic> parking = Map<String, dynamic>.from(value as Map);
+        Map<String, dynamic> parking =
+            Map<String, dynamic>.from(json.decode(json.encode(value)));
         parkingsList.add(Parking.fromJSON(parking));
       });
     }

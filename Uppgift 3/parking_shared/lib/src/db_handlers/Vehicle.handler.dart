@@ -1,11 +1,11 @@
-import 'package:firebase_dart/database.dart';
+import 'dart:convert';
+
 import 'package:parking_shared/parking_shared.dart';
-import '../serverHandlers/router.config.dart';
+import 'package:firebase_database/firebase_database.dart';
 
 class VehicleRepository implements RepositoryInterface<Vehicle> {
-  DatabaseReference database = FirebaseDatabase(app: RouterConfig.instance.app)
-      .reference()
-      .child("vehicles");
+  DatabaseReference database =
+      FirebaseDatabase.instance.ref().child("vehicles");
 
   @override
   Future<Vehicle> add(Vehicle vehicle) async {
@@ -20,11 +20,11 @@ class VehicleRepository implements RepositoryInterface<Vehicle> {
 
   @override
   Future<Vehicle?> getById(String id) async {
-    DataSnapshot snapshot = await database.child('/$id').once();
-
-    if (snapshot.value != null) {
+    DatabaseEvent event = await database.child('/$id').once();
+    if (event.snapshot.value != null) {
+      dynamic vehicleMap = event.snapshot.value;
       Map<String, dynamic> vehicle =
-          Map<String, dynamic>.from(snapshot.value as Map);
+          Map<String, dynamic>.from(json.decode(json.encode(vehicleMap)));
       return Vehicle.fromJSON(vehicle);
     } else {
       return null;
@@ -33,14 +33,14 @@ class VehicleRepository implements RepositoryInterface<Vehicle> {
 
   @override
   Future<List<Vehicle>> getAll() async {
-    DataSnapshot snapshot = await database.once();
+    DatabaseEvent event = await database.once();
     List<Vehicle> vehiclesList = [];
 
-    if (snapshot.value != null) {
-      Map<dynamic, dynamic> vehiclesMap =
-          snapshot.value as Map<dynamic, dynamic>;
+    if (event.snapshot.value != null) {
+      dynamic vehiclesMap = event.snapshot.value;
       vehiclesMap.forEach((key, value) {
-        Map<String, dynamic> vehicle = Map<String, dynamic>.from(value as Map);
+        Map<String, dynamic> vehicle =
+            Map<String, dynamic>.from(json.decode(json.encode(value)));
         vehiclesList.add(Vehicle.fromJSON(vehicle));
       });
     }
