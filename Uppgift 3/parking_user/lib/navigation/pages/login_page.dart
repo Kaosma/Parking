@@ -19,7 +19,6 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     authenticate() => {authenticateUser(context, usedId)};
-
     final formKey = GlobalKey<FormState>();
 
     void addPersonDialog() {
@@ -108,73 +107,79 @@ class _LoginPageState extends State<LoginPage> {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Inloggning')),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: <Widget>[
-              TextFormField(
-                controller: _emailController,
-                decoration: const InputDecoration(
-                  labelText: 'Id',
-                  hintText: 'Fyll i id',
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Fyll i email';
-                  }
-                  return null;
-                },
-                onChanged: (value) => usedId = value,
-              ),
-              // TextFormField(
-              //   controller: _emailController,
-              //   decoration: const InputDecoration(
-              //     labelText: 'Email',
-              //     hintText: 'Fyll i email',
-              //   ),
-              //   validator: (value) {
-              //     if (value == null || value.isEmpty) {
-              //       return 'Fyll i email';
-              //     }
-              //     return null;
-              //   },
-              // ),
-              // const SizedBox(height: 16.0),
-              // TextFormField(
-              //   controller: _passwordController,
-              //   decoration: const InputDecoration(
-              //     labelText: 'Lösenord',
-              //     hintText: 'Fyll i lösenord',
-              //   ),
-              //   obscureText: true,
-              //   validator: (value) {
-              //     if (value == null || value.isEmpty) {
-              //       return 'Fyll i lösenord';
-              //     }
-              //     return null;
-              //   },
-              // ),
-              const SizedBox(height: 16.0),
-              TextButton(
-                onPressed: addPersonDialog,
-                style: TextButton.styleFrom(
-                  padding: const EdgeInsets.all(8.0), // Padding
-                ),
-                child: const Text('Registrera ny användare'),
-              ),
-              const SizedBox(height: 16.0),
+        appBar: AppBar(title: const Text('Inloggning')),
+        body: FutureBuilder<List<Person>>(
+            future: getAllOwnersHandler(),
+            builder: (context, snapshot) {
+              final users = snapshot.data!.map((user) => {user.id});
+              return Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    children: <Widget>[
+                      TextFormField(
+                        controller: _emailController,
+                        decoration: const InputDecoration(
+                          labelText: 'Id',
+                          hintText: 'Fyll i id',
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Fyll i email';
+                          }
+                          return null;
+                        },
+                        onChanged: (value) => usedId = value,
+                      ),
+                      // TextFormField(
+                      //   controller: _emailController,
+                      //   decoration: const InputDecoration(
+                      //     labelText: 'Email',
+                      //     hintText: 'Fyll i email',
+                      //   ),
+                      //   validator: (value) {
+                      //     if (value == null || value.isEmpty) {
+                      //       return 'Fyll i email';
+                      //     }
+                      //     return null;
+                      //   },
+                      // ),
+                      // const SizedBox(height: 16.0),
+                      // TextFormField(
+                      //   controller: _passwordController,
+                      //   decoration: const InputDecoration(
+                      //     labelText: 'Lösenord',
+                      //     hintText: 'Fyll i lösenord',
+                      //   ),
+                      //   obscureText: true,
+                      //   validator: (value) {
+                      //     if (value == null || value.isEmpty) {
+                      //       return 'Fyll i lösenord';
+                      //     }
+                      //     return null;
+                      //   },
+                      // ),
+                      const SizedBox(height: 16.0),
+                      TextButton(
+                        onPressed: addPersonDialog,
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.all(8.0), // Padding
+                        ),
+                        child: const Text('Registrera ny användare'),
+                      ),
+                      const SizedBox(height: 16.0),
 
-              ElevatedButton(
-                onPressed: authenticate,
-                child: const Text('Logga in'),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
+                      ElevatedButton(
+                        onPressed: authenticate,
+                        child: const Text('Logga in'),
+                      ),
+                      const SizedBox(height: 16.0),
+                      Text('Tillgängliga användare: $users')
+                    ],
+                  ),
+                ),
+              );
+            }));
   }
 }
