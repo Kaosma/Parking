@@ -1,30 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:parking_shared/parking_shared.dart';
-import 'package:parking_user/utils/constants.dart';
 
 class VehiclesPage extends StatelessWidget {
-  const VehiclesPage({super.key});
-
-  Future<List<Vehicle>> getAllVehiclesHandler(
-      VehicleRepository repository) async {
-    return await repository.getAll();
-  }
-
-  Future<Person?> getUser(PersonRepository repository) async {
-    return await repository.getById(AppStrings.userId);
-  }
-
-  Future<List<Person>> getAllOwners(PersonRepository repository) async {
-    return await repository.getAll();
-  }
+  final String userId;
+  const VehiclesPage({super.key, required this.userId});
 
   @override
   Widget build(BuildContext context) {
-    var personRepository = PersonRepository();
-    var vehicleRepository = VehicleRepository();
-
     return FutureBuilder<Person?>(
-      future: getUser(personRepository),
+      future: getOwnerHandler(userId),
       builder: (context, userSnapshot) {
         if (userSnapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
@@ -103,7 +87,7 @@ class VehiclesPage extends StatelessWidget {
                         Navigator.of(context).pop();
                       }
                     },
-                    child: const Text('Add'),
+                    child: const Text('Lägg till'),
                   ),
                 ],
               );
@@ -120,30 +104,21 @@ class VehiclesPage extends StatelessWidget {
             context: context,
             builder: (BuildContext context) {
               return FutureBuilder<List<Person>>(
-                future: getAllOwners(personRepository),
+                future: getAllOwnersHandler(),
                 builder: (context, ownersSnapshot) {
                   if (ownersSnapshot.connectionState ==
                       ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
                   } else if (ownersSnapshot.hasError ||
                       !ownersSnapshot.hasData) {
-                    return AlertDialog(
-                      title: const Text('Error'),
-                      content: Text(
-                          'Could not fetch owners: ${ownersSnapshot.error}'),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: const Text('Close'),
-                        ),
-                      ],
+                    return InfoDialog(
+                      title: 'Error',
+                      text: 'Could not fetch owners: ${ownersSnapshot.error}',
                     );
                   }
 
-                  final owners = ownersSnapshot.data!;
-
                   return AlertDialog(
-                    title: const Text('Edit Vehicle'),
+                    title: const Text('Ändra fordon'),
                     content: Form(
                       key: formKey,
                       child: Column(
@@ -181,26 +156,6 @@ class VehiclesPage extends StatelessWidget {
                             },
                           ),
                           const SizedBox(height: 16),
-                          DropdownButtonFormField<String>(
-                            value: selectedOwner
-                                ?.id, // Use the owner's id to identify the selected owner
-                            decoration: const InputDecoration(
-                              labelText: 'Ägare',
-                            ),
-                            items: owners
-                                .map(
-                                  (owner) => DropdownMenuItem<String>(
-                                    value: owner.id,
-                                    child: Text(owner.name),
-                                  ),
-                                )
-                                .toList(),
-                            onChanged: (value) {
-                              // Find the owner by id
-                              selectedOwner = owners
-                                  .firstWhere((owner) => owner.id == value);
-                            },
-                          ),
                         ],
                       ),
                     ),
@@ -209,24 +164,24 @@ class VehiclesPage extends StatelessWidget {
                         onPressed: () {
                           Navigator.of(context).pop();
                         },
-                        child: const Text('Cancel'),
+                        child: const Text('Avbryt'),
                       ),
                       ElevatedButton(
                         onPressed: () {
-                          if (formKey.currentState!.validate() &&
-                              selectedOwner != null) {
+                          if (formKey.currentState!.validate()) {
                             vehicleRepository.update(
                               vehicle.id,
                               Vehicle(
                                 registrationNumber,
                                 vehicleType,
-                                selectedOwner!,
+                                selectedOwner,
+                                vehicle.id,
                               ),
                             );
                             Navigator.of(context).pop();
                           }
                         },
-                        child: const Text('Save'),
+                        child: const Text('Spara'),
                       ),
                     ],
                   );
@@ -240,33 +195,21 @@ class VehiclesPage extends StatelessWidget {
           showDialog(
             context: context,
             builder: (BuildContext context) {
-              return AlertDialog(
-                title: const Text('Confirm Deletion'),
-                content: Text(
-                    'Are you sure you want to delete vehicle ${vehicle.id}?'),
-                actions: [
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop(); // Close dialog
-                    },
-                    child: const Text('Cancel'),
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                      vehicleRepository.delete(vehicle.id);
-                      Navigator.of(context).pop();
-                    },
-                    child: const Text('Delete'),
-                  ),
-                ],
-              );
+              return InfoDialog(
+                  title: 'Ta bort fordon',
+                  text:
+                      'Är du säker på att du vill ta bort fordon ${vehicle.id}?',
+                  actionText: 'Ta bort',
+                  confirmAction: () {
+                    vehicleRepository.delete(vehicle.id);
+                  });
             },
           );
         }
 
         return Scaffold(
           body: FutureBuilder<List<Vehicle>>(
-            future: getAllVehiclesHandler(vehicleRepository),
+            future: getAllVehiclesHandler(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
@@ -276,34 +219,23 @@ class VehiclesPage extends StatelessWidget {
                 );
               } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                 return const Center(
-                  child: Text('No vehicles available.'),
+                  child: Text('Inga fordon hittade.'),
                 );
               }
 
               final vehiclesList = snapshot.data!
                   .where((vehicle) => vehicle.owner.id == AppStrings.userId)
                   .map((vehicle) {
-                return Card(
-                  margin: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: ListTile(
-                    leading: const Icon(Icons.car_crash),
-                    title: Text('Vehicle: ${vehicle.registrationNumber}'),
-                    subtitle: Text('Type: ${vehicle.type}'),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.edit),
-                          onPressed: () => editVehicleDialog(vehicle),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.delete),
-                          onPressed: () => deleteVehicleDialog(vehicle),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
+                return ListCard(
+                    icon: Icons.car_crash,
+                    title: vehicle.registrationNumber,
+                    text: 'Typ: ${vehicle.type}',
+                    onEdit: () {
+                      editVehicleDialog(vehicle);
+                    },
+                    onDelete: () {
+                      deleteVehicleDialog(vehicle);
+                    });
               }).toList();
 
               return ListView(

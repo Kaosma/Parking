@@ -7,5 +7,8 @@ class AppColors {
 }
 
 class AppStrings {
-  static const String userId = 'd42a2a24-6df48cc3';
+  static String userId = '';
+  static void setUserId(String newId) {
+    userId = newId;
+  }
 }

@@ -3,7 +3,7 @@ import 'package:parking_admin/navigation/pages/users_page.dart';
 
 import 'pages/active_parkings_page.dart';
 import 'pages/parking_spaces_page.dart';
-import 'pages/settings_page.dart';
+import 'pages/statistics_page.dart';
 
 class AdminNavigation extends StatefulWidget {
   const AdminNavigation({super.key});
@@ -19,7 +19,7 @@ class _AdminNavigationState extends State<AdminNavigation> {
     ParkingSpacesPage(),
     ActiveParkingsPage(),
     UsersPage(),
-    SettingsPage(),
+    StatisticsPage(),
   ];
   NavigationRailLabelType labelType = NavigationRailLabelType.all;
 
@@ -51,8 +51,8 @@ class _AdminNavigationState extends State<AdminNavigation> {
                 label: Text('Användare'),
               ),
               NavigationRailDestination(
-                icon: Icon(Icons.settings),
-                label: Text('Inställningar'),
+                icon: Icon(Icons.stacked_bar_chart),
+                label: Text('Statistik'),
               ),
             ],
           ),

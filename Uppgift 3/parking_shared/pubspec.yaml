@@ -13,6 +13,7 @@ dependencies:
   firebase_core: ^3.8.0
   firebase_database: ^11.1.6
   shelf: ^1.4.0
+  intl: ^0.18.0
 
 dev_dependencies:
   flutter_test:
