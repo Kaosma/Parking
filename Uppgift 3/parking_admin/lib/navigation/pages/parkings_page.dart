@@ -40,13 +40,8 @@ class _ParkingsPageState extends State<ParkingsPage> {
             ),
             ElevatedButton(
               onPressed: () {
-                // Perform the deletion
                 parkingRepository.delete(parking.id);
-
-                // Close the dialog
                 Navigator.of(context).pop();
-
-                // Reload the parkings list
                 _reloadParkings();
               },
               child: const Text('Radera'),

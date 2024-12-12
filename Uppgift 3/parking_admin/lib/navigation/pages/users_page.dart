@@ -89,7 +89,7 @@ class _UsersPageState extends State<UsersPage> {
 
                   if (personalNumber != null) {
                     personRepository.add(Person(name, personalNumber));
-                    _loadUsers(); // Reload the list
+                    _loadUsers();
                     Navigator.of(context).pop();
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -176,7 +176,7 @@ class _UsersPageState extends State<UsersPage> {
                       Person(nameController.text.trim(), parsedPersonalNumber,
                           person.id),
                     );
-                    _loadUsers(); // Reload the list
+                    _loadUsers();
                     Navigator.of(context).pop();
                   }
                 }
@@ -207,7 +207,7 @@ class _UsersPageState extends State<UsersPage> {
             ElevatedButton(
               onPressed: () {
                 personRepository.delete(person.id);
-                _loadUsers(); // Reload the list
+                _loadUsers();
                 Navigator.of(context).pop();
               },
               child: const Text('Ta bort'),

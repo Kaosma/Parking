@@ -105,7 +105,7 @@ class _VehiclesPageState extends State<VehiclesPage> {
                           Vehicle(registrationNumber, vehicleType, owner),
                         );
                         Navigator.of(context).pop();
-                        _loadVehicles(); // Reload after adding a vehicle
+                        _loadVehicles();
                       }
                     },
                     child: const Text('Lägg till'),
@@ -180,7 +180,7 @@ class _VehiclesPageState extends State<VehiclesPage> {
                               vehicle.id),
                         );
                         Navigator.of(context).pop();
-                        _loadVehicles(); // Reload after editing a vehicle
+                        _loadVehicles();
                       }
                     },
                     child: const Text('Spara'),
@@ -211,7 +211,7 @@ class _VehiclesPageState extends State<VehiclesPage> {
                     onPressed: () {
                       vehicleRepository.delete(vehicle.id);
                       Navigator.of(context).pop();
-                      _loadVehicles(); // Reload after deleting a vehicle
+                      _loadVehicles();
                     },
                     child: const Text('Ta bort'),
                   ),

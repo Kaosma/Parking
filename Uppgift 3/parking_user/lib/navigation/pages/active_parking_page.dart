@@ -185,7 +185,8 @@ class _ActiveParkingsPageState extends State<ActiveParkingsPage> {
 
     final List<ParkingSpace> inactiveParkingSpaces =
         parkingSpaces.where((space) {
-      return !activeParkingSpaceIds.contains(space.id);
+      return !activeParkingSpaceIds.contains(space.id) ||
+          space.id == parking.parkingSpace.id;
     }).toList();
 
     showDialog(
@@ -227,17 +228,17 @@ class _ActiveParkingsPageState extends State<ActiveParkingsPage> {
                 ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<String>(
-                  value: null,
-                  items: inactiveParkingSpaces.map((parkingSpace) {
+                  value: selectedParkingSpace?.id,
+                  items: inactiveParkingSpaces.map((space) {
                     return DropdownMenuItem<String>(
-                      value: parkingSpace.id,
-                      child: Text(parkingSpace.address),
+                      value: space.id,
+                      child: Text(space.address),
                     );
                   }).toList(),
                   onChanged: (value) {
                     setState(() {
-                      selectedParkingSpace = parkingSpaces.firstWhere(
-                          (parkingSpace) => parkingSpace.id == value);
+                      selectedParkingSpace = parkingSpaces
+                          .firstWhere((space) => space.id == value);
                     });
                   },
                   decoration: const InputDecoration(
@@ -413,6 +414,7 @@ class _ActiveParkingsPageState extends State<ActiveParkingsPage> {
                     onDelete: () {
                       deleteParkingDialog(parking);
                     },
+                    isActive: true,
                   );
                 }).toList(),
               ],

@@ -57,7 +57,6 @@ class _AdminNavigationState extends State<AdminNavigation> {
             ],
           ),
           const VerticalDivider(thickness: 1, width: 1),
-          // This is the main content.
           Expanded(child: Scaffold(body: pages[currentPageIndex])),
         ],
       ),
