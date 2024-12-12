@@ -166,14 +166,27 @@ class _ActiveParkingsPageState extends State<ActiveParkingsPage> {
     );
   }
 
-  Future<void> editParkingDialog(Parking parking) async {
+  Future<void> editParkingDialog(Parking parking, int timeNow) async {
     Vehicle? selectedVehicle = parking.vehicle;
     ParkingSpace? selectedParkingSpace = parking.parkingSpace;
     String startTimeString = parking.startTime.toString();
     String endTimeString = parking.endTime.toString();
 
     final List<Vehicle> vehicles = await getAllVehiclesHandler();
+    final List<Parking> parkings = await getAllParkingsHandler();
     final List<ParkingSpace> parkingSpaces = await getAllParkingSpacesHandler();
+
+    final activeParkings = parkings.where((parking) {
+      return parking.startTime <= timeNow && parking.endTime >= timeNow;
+    }).toList();
+
+    final Set<String> activeParkingSpaceIds =
+        activeParkings.map((parking) => parking.parkingSpace.id).toSet();
+
+    final List<ParkingSpace> inactiveParkingSpaces =
+        parkingSpaces.where((space) {
+      return !activeParkingSpaceIds.contains(space.id);
+    }).toList();
 
     showDialog(
       context: context,
@@ -214,8 +227,8 @@ class _ActiveParkingsPageState extends State<ActiveParkingsPage> {
                 ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<String>(
-                  value: selectedParkingSpace?.id,
-                  items: parkingSpaces.map((parkingSpace) {
+                  value: null,
+                  items: inactiveParkingSpaces.map((parkingSpace) {
                     return DropdownMenuItem<String>(
                       value: parkingSpace.id,
                       child: Text(parkingSpace.address),
@@ -352,7 +365,9 @@ class _ActiveParkingsPageState extends State<ActiveParkingsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final int currentTime = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+    int getCurrentTime() {
+      return DateTime.now().millisecondsSinceEpoch ~/ 1000;
+    }
 
     return Scaffold(
       body: FutureBuilder<List<Parking>>(
@@ -372,13 +387,13 @@ class _ActiveParkingsPageState extends State<ActiveParkingsPage> {
               (parking) => parking.vehicle.owner.id == AppStrings.userId);
 
           final activeParkings = parkings.where((parking) {
-            return parking.startTime <= currentTime &&
-                parking.endTime >= currentTime;
+            return parking.startTime <= getCurrentTime() &&
+                parking.endTime >= getCurrentTime();
           }).toList();
 
           final inactiveParkings = parkings.where((parking) {
-            return parking.startTime > currentTime ||
-                parking.endTime < currentTime;
+            return parking.startTime > getCurrentTime() ||
+                parking.endTime < getCurrentTime();
           }).toList();
 
           return ListView(
@@ -393,7 +408,7 @@ class _ActiveParkingsPageState extends State<ActiveParkingsPage> {
                     text:
                         '${convertUnixToDateTime(parking.startTime)} - ${convertUnixToDateTime(parking.endTime)}',
                     onEdit: () {
-                      editParkingDialog(parking);
+                      editParkingDialog(parking, getCurrentTime());
                     },
                     onDelete: () {
                       deleteParkingDialog(parking);
@@ -412,7 +427,7 @@ class _ActiveParkingsPageState extends State<ActiveParkingsPage> {
                     text:
                         '${convertUnixToDateTime(parking.startTime)} - ${convertUnixToDateTime(parking.endTime)}',
                     onEdit: () {
-                      editParkingDialog(parking);
+                      editParkingDialog(parking, getCurrentTime());
                     },
                     onDelete: () {
                       deleteParkingDialog(parking);
@@ -425,7 +440,7 @@ class _ActiveParkingsPageState extends State<ActiveParkingsPage> {
         },
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => addParkingDialog(currentTime),
+        onPressed: () => addParkingDialog(getCurrentTime()),
         label: const Text('Starta ny parkering'),
         icon: const Icon(Icons.add),
         backgroundColor: Colors.amber,

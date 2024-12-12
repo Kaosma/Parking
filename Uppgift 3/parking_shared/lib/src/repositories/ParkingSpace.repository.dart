@@ -52,6 +52,23 @@ class ParkingSpaceRepository implements RepositoryInterface<ParkingSpace> {
       String address, ParkingSpace newParkingSpace) async {
     try {
       await database.child('/$address').update(newParkingSpace.toJSON());
+
+      final parkingsSnapshot = await database.child('parkings').get();
+      if (parkingsSnapshot.exists) {
+        final parkingsMap = parkingsSnapshot.value as Map<String, dynamic>;
+        final parkingsToUpdate = parkingsMap.entries.where((entry) {
+          final parking = Parking.fromJSON(entry.value);
+          return parking.parkingSpace.id == newParkingSpace.id;
+        });
+
+        for (var entry in parkingsToUpdate) {
+          final parking = Parking.fromJSON(entry.value);
+          parking.parkingSpace = newParkingSpace;
+          await database
+              .child('parkings/${entry.key}')
+              .update(parking.toJSON());
+        }
+      }
       return newParkingSpace;
     } catch (e) {
       return null;

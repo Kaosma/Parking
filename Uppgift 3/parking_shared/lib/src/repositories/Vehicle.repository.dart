@@ -51,6 +51,23 @@ class VehicleRepository implements RepositoryInterface<Vehicle> {
   Future<Vehicle?> update(String id, Vehicle newVehicle) async {
     try {
       await database.child('/$id').update(newVehicle.toJSON());
+
+      final parkingsSnapshot = await database.child('parkings').get();
+      if (parkingsSnapshot.exists) {
+        final parkingsMap = parkingsSnapshot.value as Map<String, dynamic>;
+        final parkingsToUpdate = parkingsMap.entries.where((entry) {
+          final parking = Parking.fromJSON(entry.value);
+          return parking.vehicle.id == newVehicle.id;
+        });
+
+        for (var entry in parkingsToUpdate) {
+          final parking = Parking.fromJSON(entry.value);
+          parking.vehicle = newVehicle;
+          await database
+              .child('parkings/${entry.key}')
+              .update(parking.toJSON());
+        }
+      }
       return newVehicle;
     } catch (e) {
       return null;

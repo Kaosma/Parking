@@ -1,8 +1,61 @@
 import 'package:flutter/material.dart';
 import 'package:parking_shared/parking_shared.dart';
 
-class ActiveParkingsPage extends StatelessWidget {
-  const ActiveParkingsPage({super.key});
+class ParkingsPage extends StatefulWidget {
+  const ParkingsPage({super.key});
+
+  @override
+  _ParkingsPageState createState() => _ParkingsPageState();
+}
+
+class _ParkingsPageState extends State<ParkingsPage> {
+  late Future<List<Parking>> _parkingsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _reloadParkings();
+  }
+
+  void _reloadParkings() {
+    setState(() {
+      _parkingsFuture = getAllParkingsHandler();
+    });
+  }
+
+  void deleteParkingDialog(Parking parking) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Ta bort parkering'),
+          content: Text(
+              'Är du säker på att du vill ta bort parkeringen ${parking.id}?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Avbryt'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                // Perform the deletion
+                parkingRepository.delete(parking.id);
+
+                // Close the dialog
+                Navigator.of(context).pop();
+
+                // Reload the parkings list
+                _reloadParkings();
+              },
+              child: const Text('Radera'),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -10,7 +63,7 @@ class ActiveParkingsPage extends StatelessWidget {
 
     return Scaffold(
       body: FutureBuilder<List<Parking>>(
-        future: getAllParkingsHandler(),
+        future: _parkingsFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -53,6 +106,10 @@ class ActiveParkingsPage extends StatelessWidget {
                         '${parking.vehicle.registrationNumber}, ${parking.parkingSpace.address}',
                     text:
                         '${convertUnixToDateTime(parking.startTime)} - ${convertUnixToDateTime(parking.endTime)}',
+                    onDelete: () {
+                      deleteParkingDialog(parking);
+                    },
+                    isActive: true,
                   );
                 }).toList(),
               ],
@@ -76,6 +133,9 @@ class ActiveParkingsPage extends StatelessWidget {
                         '${parking.vehicle.registrationNumber}, ${parking.parkingSpace.address}',
                     text:
                         '${convertUnixToDateTime(parking.startTime)} - ${convertUnixToDateTime(parking.endTime)}',
+                    onDelete: () {
+                      deleteParkingDialog(parking);
+                    },
                   );
                 }).toList(),
               ],

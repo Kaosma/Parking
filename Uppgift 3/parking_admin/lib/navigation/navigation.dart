@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:parking_admin/navigation/pages/users_page.dart';
 
-import 'pages/active_parkings_page.dart';
+import 'pages/parkings_page.dart';
 import 'pages/parking_spaces_page.dart';
 import 'pages/statistics_page.dart';
 
@@ -17,7 +17,7 @@ class _AdminNavigationState extends State<AdminNavigation> {
 
   final List<Widget> pages = const [
     ParkingSpacesPage(),
-    ActiveParkingsPage(),
+    ParkingsPage(),
     UsersPage(),
     StatisticsPage(),
   ];
@@ -44,7 +44,7 @@ class _AdminNavigationState extends State<AdminNavigation> {
               ),
               NavigationRailDestination(
                 icon: Icon(Icons.directions_car),
-                label: Text('Aktiva Parkeringar'),
+                label: Text('Parkeringar'),
               ),
               NavigationRailDestination(
                 icon: Icon(Icons.people),

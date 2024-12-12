@@ -50,6 +50,22 @@ class PersonRepository implements RepositoryInterface<Person> {
   Future<Person?> update(String id, Person newPerson) async {
     try {
       await database.child('/$id').update(newPerson.toJSON());
+      final vehiclesSnapshot = await database.child('vehicles').get();
+      if (vehiclesSnapshot.exists) {
+        final vehiclesMap = vehiclesSnapshot.value as Map<String, dynamic>;
+        final vehiclesToUpdate = vehiclesMap.entries.where((entry) {
+          final vehicle = Vehicle.fromJSON(entry.value);
+          return vehicle.owner.id == id;
+        });
+
+        for (var entry in vehiclesToUpdate) {
+          final vehicle = Vehicle.fromJSON(entry.value);
+          vehicle.owner = newPerson;
+          await database
+              .child('vehicles/${entry.key}')
+              .update(vehicle.toJSON());
+        }
+      }
       return newPerson;
     } catch (e) {
       return null;

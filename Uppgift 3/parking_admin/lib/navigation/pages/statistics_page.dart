@@ -28,14 +28,17 @@ class _StatisticsPageState extends State<StatisticsPage> {
           final activeParkings = parkings.where((parking) {
             return parking.startTime <= currentTime &&
                 parking.endTime >= currentTime;
-          }).length;
+          });
 
-          var totalIncome = 0;
-          parkings.where((parking) {
+          final inactiveParkings = parkings.where((parking) {
             return parking.startTime > currentTime ||
                 parking.endTime < currentTime;
-          }).forEach((parking) =>
-              totalIncome = totalIncome + parking.calculateParkingPrice());
+          });
+
+          var totalIncome = 0;
+          for (var parking in inactiveParkings) {
+            totalIncome = totalIncome + parking.calculateParkingPrice();
+          }
 
           final Map<String, int> usageCount = {};
           for (var parking in parkings) {
@@ -62,8 +65,9 @@ class _StatisticsPageState extends State<StatisticsPage> {
                   margin: const EdgeInsets.only(bottom: 16.0),
                   child: ListTile(
                     leading: const Icon(Icons.car_repair, color: Colors.green),
-                    title: const Text('Aktiva Parkeringar'),
-                    subtitle: Text('$activeParkings parkeringar'),
+                    title: const Text('Parkeringar'),
+                    subtitle: Text(
+                        '${activeParkings.length} aktiva parkeringar | ${inactiveParkings.length} tidigare parkeringar'),
                   ),
                 ),
                 Card(

@@ -1,14 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:parking_shared/parking_shared.dart';
 
-class VehiclesPage extends StatelessWidget {
+class VehiclesPage extends StatefulWidget {
   final String userId;
+
   const VehiclesPage({super.key, required this.userId});
+
+  @override
+  _VehiclesPageState createState() => _VehiclesPageState();
+}
+
+class _VehiclesPageState extends State<VehiclesPage> {
+  late Future<List<Vehicle>> _vehiclesFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadVehicles();
+  }
+
+  void _loadVehicles() {
+    setState(() {
+      _vehiclesFuture = getAllVehiclesHandler();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<Person?>(
-      future: getOwnerHandler(userId),
+      future: getOwnerHandler(widget.userId),
       builder: (context, userSnapshot) {
         if (userSnapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
@@ -74,7 +94,7 @@ class VehiclesPage extends StatelessWidget {
                 actions: [
                   TextButton(
                     onPressed: () {
-                      Navigator.of(context).pop(); // Close the dialog
+                      Navigator.of(context).pop();
                     },
                     child: const Text('Stäng'),
                   ),
@@ -85,6 +105,7 @@ class VehiclesPage extends StatelessWidget {
                           Vehicle(registrationNumber, vehicleType, owner),
                         );
                         Navigator.of(context).pop();
+                        _loadVehicles(); // Reload after adding a vehicle
                       }
                     },
                     child: const Text('Lägg till'),
@@ -98,94 +119,73 @@ class VehiclesPage extends StatelessWidget {
         void editVehicleDialog(Vehicle vehicle) {
           String registrationNumber = vehicle.registrationNumber;
           String vehicleType = vehicle.type;
-          Person? selectedOwner = vehicle.owner;
 
           showDialog(
             context: context,
             builder: (BuildContext context) {
-              return FutureBuilder<List<Person>>(
-                future: getAllOwnersHandler(),
-                builder: (context, ownersSnapshot) {
-                  if (ownersSnapshot.connectionState ==
-                      ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  } else if (ownersSnapshot.hasError ||
-                      !ownersSnapshot.hasData) {
-                    return InfoDialog(
-                      title: 'Error',
-                      text: 'Could not fetch owners: ${ownersSnapshot.error}',
-                    );
-                  }
-
-                  return AlertDialog(
-                    title: const Text('Ändra fordon'),
-                    content: Form(
-                      key: formKey,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          TextFormField(
-                            initialValue: registrationNumber,
-                            decoration: const InputDecoration(
-                              labelText: 'Registreringsnummer',
-                            ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Skriv in ett registreringsnummer';
-                              }
-                              return null;
-                            },
-                            onChanged: (value) {
-                              registrationNumber = value;
-                            },
-                          ),
-                          const SizedBox(height: 16),
-                          TextFormField(
-                            initialValue: vehicleType,
-                            decoration: const InputDecoration(
-                              labelText: 'Fordonstyp',
-                            ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Skriv in en fordonstyp';
-                              }
-                              return null;
-                            },
-                            onChanged: (value) {
-                              vehicleType = value;
-                            },
-                          ),
-                          const SizedBox(height: 16),
-                        ],
-                      ),
-                    ),
-                    actions: [
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                        child: const Text('Avbryt'),
-                      ),
-                      ElevatedButton(
-                        onPressed: () {
-                          if (formKey.currentState!.validate()) {
-                            vehicleRepository.update(
-                              vehicle.id,
-                              Vehicle(
-                                registrationNumber,
-                                vehicleType,
-                                selectedOwner,
-                                vehicle.id,
-                              ),
-                            );
-                            Navigator.of(context).pop();
+              return AlertDialog(
+                title: const Text('Ändra fordon'),
+                content: Form(
+                  key: formKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      TextFormField(
+                        initialValue: registrationNumber,
+                        decoration: const InputDecoration(
+                          labelText: 'Registreringsnummer',
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Skriv in ett registreringsnummer';
                           }
+                          return null;
                         },
-                        child: const Text('Spara'),
+                        onChanged: (value) {
+                          registrationNumber = value;
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        initialValue: vehicleType,
+                        decoration: const InputDecoration(
+                          labelText: 'Fordonstyp',
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Skriv in en fordonstyp';
+                          }
+                          return null;
+                        },
+                        onChanged: (value) {
+                          vehicleType = value;
+                        },
                       ),
                     ],
-                  );
-                },
+                  ),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text('Avbryt'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      if (formKey.currentState!.validate()) {
+                        vehicleRepository.update(
+                          vehicle.id,
+                          Vehicle(registrationNumber, vehicleType, owner,
+                              vehicle.id),
+                        );
+                        Navigator.of(context).pop();
+                        _loadVehicles(); // Reload after editing a vehicle
+                      }
+                    },
+                    child: const Text('Spara'),
+                  ),
+                ],
               );
             },
           );
@@ -195,21 +195,35 @@ class VehiclesPage extends StatelessWidget {
           showDialog(
             context: context,
             builder: (BuildContext context) {
-              return InfoDialog(
-                  title: 'Ta bort fordon',
-                  text:
-                      'Är du säker på att du vill ta bort fordon ${vehicle.id}?',
-                  actionText: 'Ta bort',
-                  confirmAction: () {
-                    vehicleRepository.delete(vehicle.id);
-                  });
+              return AlertDialog(
+                title: const Text('Ta bort fordon'),
+                content: Text(
+                  'Är du säker på att du vill ta bort fordon ${vehicle.registrationNumber}?',
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text('Avbryt'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      vehicleRepository.delete(vehicle.id);
+                      Navigator.of(context).pop();
+                      _loadVehicles(); // Reload after deleting a vehicle
+                    },
+                    child: const Text('Ta bort'),
+                  ),
+                ],
+              );
             },
           );
         }
 
         return Scaffold(
           body: FutureBuilder<List<Vehicle>>(
-            future: getAllVehiclesHandler(),
+            future: _vehiclesFuture,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
@@ -224,19 +238,14 @@ class VehiclesPage extends StatelessWidget {
               }
 
               final vehiclesList = snapshot.data!
-                  .where((vehicle) => vehicle.owner.id == AppStrings.userId)
-                  .map((vehicle) {
-                return ListCard(
-                    icon: Icons.car_crash,
-                    title: vehicle.registrationNumber,
-                    text: 'Typ: ${vehicle.type}',
-                    onEdit: () {
-                      editVehicleDialog(vehicle);
-                    },
-                    onDelete: () {
-                      deleteVehicleDialog(vehicle);
-                    });
-              }).toList();
+                  .map((vehicle) => ListCard(
+                        icon: Icons.car_crash,
+                        title: vehicle.registrationNumber,
+                        text: 'Typ: ${vehicle.type}',
+                        onEdit: () => editVehicleDialog(vehicle),
+                        onDelete: () => deleteVehicleDialog(vehicle),
+                      ))
+                  .toList();
 
               return ListView(
                 padding: const EdgeInsets.all(8.0),
@@ -245,12 +254,10 @@ class VehiclesPage extends StatelessWidget {
             },
           ),
           floatingActionButton: FloatingActionButton.extended(
-            onPressed: () => addVehicleDialog(),
+            onPressed: addVehicleDialog,
             label: const Text('Lägg till fordon'),
             icon: const Icon(Icons.add),
-            backgroundColor: Colors.amber,
           ),
-          floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
         );
       },
     );
