@@ -238,6 +238,7 @@ class _VehiclesPageState extends State<VehiclesPage> {
               }
 
               final vehiclesList = snapshot.data!
+                  .where((vehicle) => vehicle.owner.id == owner.id)
                   .map((vehicle) => ListCard(
                         icon: Icons.car_crash,
                         title: vehicle.registrationNumber,

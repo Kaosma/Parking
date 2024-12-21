@@ -75,5 +75,18 @@ class PersonRepository implements RepositoryInterface<Person> {
   @override
   Future<void> delete(String id) async {
     await database.child('/$id').remove();
+    final vehiclesSnapshot = await database.child('vehicles').get();
+    if (vehiclesSnapshot.exists) {
+      final vehiclesMap = vehiclesSnapshot.value as Map<String, dynamic>;
+
+      final vehiclesToDelete = vehiclesMap.entries.where((entry) {
+        final vehicle = Vehicle.fromJSON(entry.value);
+        return vehicle.owner.id == id;
+      });
+
+      for (var entry in vehiclesToDelete) {
+        await database.child('vehicles/${entry.key}').remove();
+      }
+    }
   }
 }
