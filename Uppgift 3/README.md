@@ -24,7 +24,7 @@ A Flutter project that administrates users, parking spaces and parkings created 
 ## Limitations
 - Hot reload between user and admin is not implemented
 - Login a bit too complicated for users since id is currently used for that
-- Statistics not updated dynamically
+- User is currently not able to change it's own information
 
 ## Installation
 Clone the repository:
