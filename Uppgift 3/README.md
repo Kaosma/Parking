@@ -5,6 +5,7 @@ A Flutter project that administrates users, parking spaces and parkings created 
 ## Table of Contents
 - [Features Admin](#featuresadmin)
 - [Features User](#featuresadmin)
+- [Limitations](#limitations)
 - [Installation](#installation)
 - [Usage](#usage)
 - [License](#license)
@@ -20,8 +21,12 @@ A Flutter project that administrates users, parking spaces and parkings created 
 - Vehicles (owned by user) (Create, Read, Update, Delete)
 - Parkings (owned by user) (Read, Delete)
 
-## Installation
+## Limitations
+- Hot reload between user and admin is not implemented
+- Login a bit too complicated for users since id is currently used for that
+- Statistics not updated dynamically
 
+## Installation
 Clone the repository:
 ```bash
 git clone https://github.com/Kaosma/Parking.git
