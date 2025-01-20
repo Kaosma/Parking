@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:parking_shared/parking_shared.dart';
 
 class ActiveParkingsPage extends StatefulWidget {
-  final String userId;
-  const ActiveParkingsPage({super.key, required this.userId});
+  const ActiveParkingsPage({super.key});
 
   @override
   State<ActiveParkingsPage> createState() => _ActiveParkingsPageState();

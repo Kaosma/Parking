@@ -1,18 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:parking_shared/parking_shared.dart';
+import 'package:provider/provider.dart';
 
 class VehiclesPage extends StatefulWidget {
-  final String userId;
-
-  const VehiclesPage({super.key, required this.userId});
+  const VehiclesPage({super.key});
 
   @override
   _VehiclesPageState createState() => _VehiclesPageState();
 }
 
 class _VehiclesPageState extends State<VehiclesPage> {
-  late Future<List<Vehicle>> _vehiclesFuture;
-
   @override
   void initState() {
     super.initState();
@@ -20,224 +18,200 @@ class _VehiclesPageState extends State<VehiclesPage> {
   }
 
   void _loadVehicles() {
-    setState(() {
-      _vehiclesFuture = getAllVehiclesHandler();
-    });
+    context.read<VehiclesBloc>().add(LoadVehicles());
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<Person?>(
-      future: getOwnerHandler(widget.userId),
-      builder: (context, userSnapshot) {
-        if (userSnapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
-        } else if (userSnapshot.hasError || userSnapshot.data == null) {
-          return Scaffold(
-            body: Center(
-              child: Text('Error fetching user: ${userSnapshot.error}'),
+    final owner = context.read<Person>();
+    final formKey = GlobalKey<FormState>();
+
+    void addVehicleDialog() {
+      String registrationNumber = '';
+      String vehicleType = '';
+
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Nytt fordon'),
+            content: Form(
+              key: formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextFormField(
+                    decoration: const InputDecoration(
+                      labelText: 'Registreringsnummer',
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Skriv in ett registreringsnummer';
+                      }
+                      return null;
+                    },
+                    onChanged: (value) {
+                      registrationNumber = value;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    decoration: const InputDecoration(
+                      labelText: 'Fordonstyp',
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Skriv in en fordonstyp';
+                      }
+                      return null;
+                    },
+                    onChanged: (value) {
+                      vehicleType = value;
+                    },
+                  ),
+                ],
+              ),
             ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text('Stäng'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  if (formKey.currentState!.validate()) {
+                    context.read<VehiclesBloc>().add(CreateVehicle(
+                        vehicle:
+                            Vehicle(registrationNumber, vehicleType, owner)));
+                    Navigator.of(context).pop();
+                    _loadVehicles();
+                  }
+                },
+                child: const Text('Lägg till'),
+              ),
+            ],
           );
-        }
+        },
+      );
+    }
 
-        final owner = userSnapshot.data!;
-        final formKey = GlobalKey<FormState>();
+    void editVehicleDialog(Vehicle vehicle) {
+      String registrationNumber = vehicle.registrationNumber;
+      String vehicleType = vehicle.type;
 
-        void addVehicleDialog() {
-          String registrationNumber = '';
-          String vehicleType = '';
-
-          showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return AlertDialog(
-                title: const Text('Nytt fordon'),
-                content: Form(
-                  key: formKey,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      TextFormField(
-                        decoration: const InputDecoration(
-                          labelText: 'Registreringsnummer',
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Skriv in ett registreringsnummer';
-                          }
-                          return null;
-                        },
-                        onChanged: (value) {
-                          registrationNumber = value;
-                        },
-                      ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        decoration: const InputDecoration(
-                          labelText: 'Fordonstyp',
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Skriv in en fordonstyp';
-                          }
-                          return null;
-                        },
-                        onChanged: (value) {
-                          vehicleType = value;
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: const Text('Stäng'),
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                      if (formKey.currentState!.validate()) {
-                        vehicleRepository.add(
-                          Vehicle(registrationNumber, vehicleType, owner),
-                        );
-                        Navigator.of(context).pop();
-                        _loadVehicles();
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Ändra fordon'),
+            content: Form(
+              key: formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextFormField(
+                    initialValue: registrationNumber,
+                    decoration: const InputDecoration(
+                      labelText: 'Registreringsnummer',
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Skriv in ett registreringsnummer';
                       }
+                      return null;
                     },
-                    child: const Text('Lägg till'),
-                  ),
-                ],
-              );
-            },
-          );
-        }
-
-        void editVehicleDialog(Vehicle vehicle) {
-          String registrationNumber = vehicle.registrationNumber;
-          String vehicleType = vehicle.type;
-
-          showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return AlertDialog(
-                title: const Text('Ändra fordon'),
-                content: Form(
-                  key: formKey,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      TextFormField(
-                        initialValue: registrationNumber,
-                        decoration: const InputDecoration(
-                          labelText: 'Registreringsnummer',
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Skriv in ett registreringsnummer';
-                          }
-                          return null;
-                        },
-                        onChanged: (value) {
-                          registrationNumber = value;
-                        },
-                      ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        initialValue: vehicleType,
-                        decoration: const InputDecoration(
-                          labelText: 'Fordonstyp',
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Skriv in en fordonstyp';
-                          }
-                          return null;
-                        },
-                        onChanged: (value) {
-                          vehicleType = value;
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
+                    onChanged: (value) {
+                      registrationNumber = value;
                     },
-                    child: const Text('Avbryt'),
                   ),
-                  ElevatedButton(
-                    onPressed: () {
-                      if (formKey.currentState!.validate()) {
-                        vehicleRepository.update(
-                          Vehicle(registrationNumber, vehicleType, owner,
-                              vehicle.id),
-                        );
-                        Navigator.of(context).pop();
-                        _loadVehicles();
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    initialValue: vehicleType,
+                    decoration: const InputDecoration(
+                      labelText: 'Fordonstyp',
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Skriv in en fordonstyp';
                       }
+                      return null;
                     },
-                    child: const Text('Spara'),
+                    onChanged: (value) {
+                      vehicleType = value;
+                    },
                   ),
                 ],
-              );
-            },
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text('Avbryt'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  if (formKey.currentState!.validate()) {
+                    context.read<VehiclesBloc>().add(UpdateVehicle(
+                        vehicle: Vehicle(registrationNumber, vehicleType, owner,
+                            vehicle.id)));
+                    Navigator.of(context).pop();
+                  }
+                },
+                child: const Text('Spara'),
+              ),
+            ],
           );
-        }
+        },
+      );
+    }
 
-        void deleteVehicleDialog(Vehicle vehicle) {
-          showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return AlertDialog(
-                title: const Text('Ta bort fordon'),
-                content: Text(
-                  'Är du säker på att du vill ta bort fordon ${vehicle.registrationNumber}?',
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: const Text('Avbryt'),
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                      vehicleRepository.delete(vehicle);
-                      Navigator.of(context).pop();
-                      _loadVehicles();
-                    },
-                    child: const Text('Ta bort'),
-                  ),
-                ],
-              );
-            },
+    void deleteVehicleDialog(Vehicle vehicle) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Ta bort fordon'),
+            content: Text(
+              'Är du säker på att du vill ta bort fordon ${vehicle.registrationNumber}?',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text('Avbryt'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  context
+                      .read<VehiclesBloc>()
+                      .add(DeleteVehicle(vehicle: vehicle));
+                  Navigator.of(context).pop();
+                },
+                child: const Text('Ta bort'),
+              ),
+            ],
           );
-        }
+        },
+      );
+    }
 
-        return Scaffold(
-          body: FutureBuilder<List<Vehicle>>(
-            future: _vehiclesFuture,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              } else if (snapshot.hasError) {
-                return Center(
-                  child: Text('Error fetching vehicles: ${snapshot.error}'),
-                );
-              } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                return const Center(
-                  child: Text('Inga fordon hittade.'),
-                );
-              }
-
-              final vehiclesList = snapshot.data!
-                  .where((vehicle) => vehicle.owner.id == owner.id)
+    return Scaffold(
+      body: BlocBuilder<VehiclesBloc, VehiclesState>(
+        builder: (context, state) {
+          if (state is VehiclesError) {
+            return Center(
+              child: Text('Error fetching vehicles: ${state.message}'),
+            );
+          } else if (state is VehiclesLoaded) {
+            final vehicles =
+                state.vehicles.where((vehicle) => vehicle.owner.id == owner.id);
+            if (vehicles.isNotEmpty) {
+              final vehiclesList = vehicles
                   .map((vehicle) => ListCard(
                         icon: Icons.car_crash,
                         title: vehicle.registrationNumber,
@@ -246,20 +220,25 @@ class _VehiclesPageState extends State<VehiclesPage> {
                         onDelete: () => deleteVehicleDialog(vehicle),
                       ))
                   .toList();
-
               return ListView(
                 padding: const EdgeInsets.all(8.0),
                 children: vehiclesList,
               );
-            },
-          ),
-          floatingActionButton: FloatingActionButton.extended(
-            onPressed: addVehicleDialog,
-            label: const Text('Lägg till fordon'),
-            icon: const Icon(Icons.add),
-          ),
-        );
-      },
+            } else {
+              return const Center(
+                child: Text('Inga fordon hittade.'),
+              );
+            }
+          } else {
+            return const Center(child: CircularProgressIndicator());
+          }
+        },
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: addVehicleDialog,
+        label: const Text('Lägg till fordon'),
+        icon: const Icon(Icons.add),
+      ),
     );
   }
 }

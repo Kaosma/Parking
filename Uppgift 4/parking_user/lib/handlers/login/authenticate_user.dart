@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:parking_shared/parking_shared.dart';
+import 'package:provider/provider.dart';
 import '../../navigation/navigation.dart';
 
 void authenticateUser(BuildContext context, String userId) async {
@@ -8,7 +10,31 @@ void authenticateUser(BuildContext context, String userId) async {
   if (owner != null) {
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => UserNavigation(userId: userId)),
+      MaterialPageRoute(
+          builder: (context) => Provider<Person>.value(
+              value: owner,
+              child: MultiBlocProvider(providers: [
+                BlocProvider(
+                    create: (context) =>
+                        VehiclesBloc(repository: VehicleRepository()))
+              ], child: const UserNavigation()))),
+      // MaterialPageRoute(
+      //     builder: (context) => Provider<Person>.value(
+      //         value: owner,
+      //         child: MultiBlocProvider(providers: [
+      //           BlocProvider(
+      //               create: (context) =>
+      //                   AuthBloc(repository: PersonRepository())),
+      //           BlocProvider(
+      //               create: (context) =>
+      //                   VehiclesBloc(repository: VehicleRepository())),
+      //           BlocProvider(
+      //               create: (context) =>
+      //                   ParkingSpaceBloc(repository: ParkingSpaceRepository())),
+      //           BlocProvider(
+      //               create: (context) =>
+      //                   ParkingBloc(repository: ParkingRepository()))
+      //         ], child: const UserNavigation()))),
     );
   }
 }

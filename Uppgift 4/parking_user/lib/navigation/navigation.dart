@@ -5,8 +5,7 @@ import 'pages/more_page.dart';
 import 'pages/vehicles_page.dart';
 
 class UserNavigation extends StatefulWidget {
-  final String userId;
-  const UserNavigation({super.key, required this.userId});
+  const UserNavigation({super.key});
 
   @override
   State<UserNavigation> createState() => _UserNavigationState();
@@ -21,8 +20,8 @@ class _UserNavigationState extends State<UserNavigation> {
   void initState() {
     super.initState();
     pages = [
-      ActiveParkingsPage(userId: widget.userId),
-      VehiclesPage(userId: widget.userId),
+      const ActiveParkingsPage(),
+      const VehiclesPage(),
       const MorePage(),
     ];
   }

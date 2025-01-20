@@ -111,7 +111,7 @@ class _LoginPageState extends State<LoginPage> {
         body: FutureBuilder<List<Person>>(
             future: getAllOwnersHandler(),
             builder: (context, snapshot) {
-              final users = snapshot.data!.map((user) => {user.id});
+              final users = snapshot.data?.map((user) => {user.id});
               return Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Form(
@@ -175,7 +175,7 @@ class _LoginPageState extends State<LoginPage> {
                         child: const Text('Logga in'),
                       ),
                       const SizedBox(height: 16.0),
-                      Text('Tillgängliga användare: $users')
+                      SelectableText('Tillgängliga användare: $users')
                     ],
                   ),
                 ),
