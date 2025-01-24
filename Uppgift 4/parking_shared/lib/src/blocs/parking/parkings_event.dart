@@ -1,24 +1,24 @@
 part of 'parkings_bloc.dart';
 
-sealed class ParkingEvent {}
+sealed class ParkingsEvent {}
 
-class LoadParkings extends ParkingEvent {}
+class LoadParkings extends ParkingsEvent {}
 
-class ReloadParkings extends ParkingEvent {}
+class ReloadParkings extends ParkingsEvent {}
 
-class UpdateParking extends ParkingEvent {
+class UpdateParking extends ParkingsEvent {
   final Parking parking;
 
   UpdateParking({required this.parking});
 }
 
-class CreateParking extends ParkingEvent {
+class CreateParking extends ParkingsEvent {
   final Parking parking;
 
   CreateParking({required this.parking});
 }
 
-class DeleteParking extends ParkingEvent {
+class DeleteParking extends ParkingsEvent {
   final Parking parking;
 
   DeleteParking({required this.parking});

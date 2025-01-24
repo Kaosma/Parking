@@ -1,6 +1,8 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:parking_shared/parking_shared.dart';
+
+import '../../models/Vehicle.dart';
+import '../../repositories/Vehicle.repository.dart';
 
 part 'vehicles_event.dart';
 part 'vehicles_state.dart';

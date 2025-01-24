@@ -1,6 +1,8 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:parking_shared/parking_shared.dart';
+
+import '../../models/Person.dart';
+import '../../repositories/Person.repository.dart';
 
 part 'auth_event.dart';
 part 'auth_state.dart';

@@ -1,15 +1,17 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:parking_shared/parking_shared.dart';
+
+import '../../models/Parking.dart';
+import '../../repositories/Parking.repository.dart';
 
 part 'parkings_event.dart';
 part 'parkings_state.dart';
 
-class ParkingBloc extends Bloc<ParkingEvent, ParkingsState> {
+class ParkingsBloc extends Bloc<ParkingsEvent, ParkingsState> {
   final ParkingRepository repository;
 
-  ParkingBloc({required this.repository}) : super(ParkingsInitial()) {
-    on<ParkingEvent>((event, emit) async {
+  ParkingsBloc({required this.repository}) : super(ParkingsInitial()) {
+    on<ParkingsEvent>((event, emit) async {
       try {
         switch (event) {
           case LoadParkings():

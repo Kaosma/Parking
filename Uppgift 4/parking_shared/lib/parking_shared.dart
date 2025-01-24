@@ -1,6 +1,7 @@
 library;
 
 export 'src/helpers/functions/convertUnixToDateTime.dart';
+export 'src/helpers/functions/getCurrentTime.dart';
 export 'src/helpers/functions/generateUuid.dart';
 export 'src/repositories/Person.repository.dart';
 export 'src/repositories/Vehicle.repository.dart';
@@ -19,3 +20,8 @@ export 'src/models/ParkingSpace.dart';
 export 'src/models/Parking.dart';
 export 'src/models/repository.interface.dart';
 export 'src/helpers/options/firebase_options.dart';
+export 'src/blocs/auth/auth_bloc.dart';
+export 'src/blocs/vehicle/vehicles_bloc.dart';
+export 'src/blocs/parking_space/parking_spaces_bloc.dart';
+export 'src/blocs/parking/parkings_bloc.dart';
+export 'src/mocks/mock_repositories.dart';
