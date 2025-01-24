@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:parking_shared/parking_shared.dart';
 
 import '../../handlers/login/authenticate_user.dart';
@@ -14,11 +15,11 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  String usedId = '';
+  String userId = '';
 
   @override
   Widget build(BuildContext context) {
-    authenticate() => {authenticateUser(context, usedId)};
+    authenticate() => {authenticateUser(context, userId)};
     final formKey = GlobalKey<FormState>();
 
     void addPersonDialog() {
@@ -27,7 +28,7 @@ class _LoginPageState extends State<LoginPage> {
 
       showDialog(
         context: context,
-        builder: (BuildContext context) {
+        builder: (BuildContext dialogContext) {
           return AlertDialog(
             title: const Text('Ny användare'),
             content: Form(
@@ -74,7 +75,7 @@ class _LoginPageState extends State<LoginPage> {
             actions: [
               TextButton(
                 onPressed: () {
-                  Navigator.of(context).pop();
+                  Navigator.of(dialogContext).pop();
                 },
                 child: const Text('Stäng'),
               ),
@@ -88,7 +89,7 @@ class _LoginPageState extends State<LoginPage> {
                       personRepository.add(
                         Person(name, personalNumber),
                       );
-                      Navigator.of(context).pop();
+                      Navigator.of(dialogContext).pop();
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
@@ -126,11 +127,11 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Fyll i email';
+                            return 'Fyll i id';
                           }
                           return null;
                         },
-                        onChanged: (value) => usedId = value,
+                        onChanged: (value) => userId = value,
                       ),
                       // TextFormField(
                       //   controller: _emailController,

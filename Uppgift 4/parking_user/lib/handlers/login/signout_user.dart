@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:parking_user/handlers/login/auth_cubit.dart';
 
 import '../../navigation/pages/login_page.dart';
 
 Future<void> signOutUser(BuildContext context) async {
+  context.read<AuthCubit>().logout();
   Navigator.pushReplacement(
     context,
     MaterialPageRoute(builder: (context) => const LoginPage()),

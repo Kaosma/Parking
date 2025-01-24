@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:parking_shared/parking_shared.dart';
-import 'package:provider/provider.dart';
 
 class VehiclesPage extends StatefulWidget {
   const VehiclesPage({super.key});
@@ -32,7 +31,7 @@ class _VehiclesPageState extends State<VehiclesPage> {
 
       showDialog(
         context: context,
-        builder: (BuildContext context) {
+        builder: (BuildContext dialogContext) {
           return AlertDialog(
             title: const Text('Nytt fordon'),
             content: Form(
@@ -75,7 +74,7 @@ class _VehiclesPageState extends State<VehiclesPage> {
             actions: [
               TextButton(
                 onPressed: () {
-                  Navigator.of(context).pop();
+                  Navigator.of(dialogContext).pop();
                 },
                 child: const Text('Stäng'),
               ),
@@ -85,8 +84,7 @@ class _VehiclesPageState extends State<VehiclesPage> {
                     context.read<VehiclesBloc>().add(CreateVehicle(
                         vehicle:
                             Vehicle(registrationNumber, vehicleType, owner)));
-                    Navigator.of(context).pop();
-                    _loadVehicles();
+                    Navigator.of(dialogContext).pop();
                   }
                 },
                 child: const Text('Lägg till'),
@@ -103,7 +101,7 @@ class _VehiclesPageState extends State<VehiclesPage> {
 
       showDialog(
         context: context,
-        builder: (BuildContext context) {
+        builder: (BuildContext dialogContext) {
           return AlertDialog(
             title: const Text('Ändra fordon'),
             content: Form(
@@ -148,7 +146,7 @@ class _VehiclesPageState extends State<VehiclesPage> {
             actions: [
               TextButton(
                 onPressed: () {
-                  Navigator.of(context).pop();
+                  Navigator.of(dialogContext).pop();
                 },
                 child: const Text('Avbryt'),
               ),
@@ -158,7 +156,7 @@ class _VehiclesPageState extends State<VehiclesPage> {
                     context.read<VehiclesBloc>().add(UpdateVehicle(
                         vehicle: Vehicle(registrationNumber, vehicleType, owner,
                             vehicle.id)));
-                    Navigator.of(context).pop();
+                    Navigator.of(dialogContext).pop();
                   }
                 },
                 child: const Text('Spara'),
@@ -172,7 +170,7 @@ class _VehiclesPageState extends State<VehiclesPage> {
     void deleteVehicleDialog(Vehicle vehicle) {
       showDialog(
         context: context,
-        builder: (BuildContext context) {
+        builder: (BuildContext dialogContext) {
           return AlertDialog(
             title: const Text('Ta bort fordon'),
             content: Text(
@@ -181,7 +179,7 @@ class _VehiclesPageState extends State<VehiclesPage> {
             actions: [
               TextButton(
                 onPressed: () {
-                  Navigator.of(context).pop();
+                  Navigator.of(dialogContext).pop();
                 },
                 child: const Text('Avbryt'),
               ),
@@ -190,7 +188,7 @@ class _VehiclesPageState extends State<VehiclesPage> {
                   context
                       .read<VehiclesBloc>()
                       .add(DeleteVehicle(vehicle: vehicle));
-                  Navigator.of(context).pop();
+                  Navigator.of(dialogContext).pop();
                 },
                 child: const Text('Ta bort'),
               ),

@@ -2,43 +2,40 @@ import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:parking_shared/parking_shared.dart';
-import 'package:parking_shared/src/blocs/vehicle/vehicles_bloc.dart';
-
-import '../mocks/mock_repositories.dart';
 
 void main() {
   group('VehiclesBloc', () {
     late MockVehicleRepository vehicleRepository;
+    Vehicle testVehicle =
+        Vehicle('ABC111', 'Typetest', Person('Nametest', 123));
+    Vehicle secondTestVehicle =
+        Vehicle('ABC222', 'typeTest2', Person('nameTest2', 123));
 
     setUp(() {
       vehicleRepository = MockVehicleRepository();
     });
 
     setUpAll(() {
-      registerFallbackValue(
-          Vehicle('ABC111', 'Typetest', Person('Nametest', 123)));
+      registerFallbackValue(testVehicle);
     });
 
     group("create vehicle", () {
-      Vehicle newVehicle =
-          Vehicle('ABC111', 'Typetest', Person('Nametest', 123));
-
       blocTest<VehiclesBloc, VehiclesState>("create vehicle test",
           setUp: () {
             when(() => vehicleRepository.add(any()))
-                .thenAnswer((_) async => newVehicle);
+                .thenAnswer((_) async => testVehicle);
             when(() => vehicleRepository.getAll())
-                .thenAnswer((_) async => [newVehicle]);
+                .thenAnswer((_) async => [testVehicle]);
           },
           build: () => VehiclesBloc(repository: vehicleRepository),
           seed: () => VehiclesLoaded(vehicles: []),
-          act: (bloc) => bloc.add(CreateVehicle(vehicle: newVehicle)),
+          act: (bloc) => bloc.add(CreateVehicle(vehicle: testVehicle)),
           expect: () => [
-                VehiclesLoaded(vehicles: [newVehicle], pending: newVehicle),
-                VehiclesLoaded(vehicles: [newVehicle], pending: null)
+                VehiclesLoaded(vehicles: [testVehicle], pending: testVehicle),
+                VehiclesLoaded(vehicles: [testVehicle], pending: null)
               ],
           verify: (_) {
-            verify(() => vehicleRepository.add(newVehicle)).called(1);
+            verify(() => vehicleRepository.add(testVehicle)).called(1);
           });
 
       blocTest<VehiclesBloc, VehiclesState>("create vehicle test error",
@@ -48,32 +45,29 @@ void main() {
           },
           build: () => VehiclesBloc(repository: vehicleRepository),
           seed: () => VehiclesLoaded(vehicles: []),
-          act: (bloc) => bloc.add(CreateVehicle(vehicle: newVehicle)),
+          act: (bloc) => bloc.add(CreateVehicle(vehicle: testVehicle)),
           expect: () => [
-                VehiclesLoaded(vehicles: [newVehicle], pending: newVehicle),
+                VehiclesLoaded(vehicles: [testVehicle], pending: testVehicle),
                 VehiclesError(
                     message: Exception("Fail to create vehicle").toString())
               ],
           verify: (_) {
-            verify(() => vehicleRepository.add(newVehicle)).called(1);
+            verify(() => vehicleRepository.add(testVehicle)).called(1);
           });
     });
 
     group("read vehicles", () {
-      Vehicle vehicle1 = Vehicle('ABC111', 'typeTest', Person('nameTest', 123));
-      Vehicle vehicle2 =
-          Vehicle('ABC222', 'typeTest2', Person('nameTest2', 123));
       blocTest<VehiclesBloc, VehiclesState>("read vehicles succeess",
           setUp: () {
             when(() => vehicleRepository.getAll())
-                .thenAnswer((_) async => [vehicle1, vehicle2]);
+                .thenAnswer((_) async => [testVehicle, secondTestVehicle]);
           },
           build: () => VehiclesBloc(repository: vehicleRepository),
           seed: () => VehiclesInitial(),
           act: (bloc) => bloc.add(LoadVehicles()),
           expect: () => [
                 VehiclesLoading(),
-                VehiclesLoaded(vehicles: [vehicle1, vehicle2]),
+                VehiclesLoaded(vehicles: [testVehicle, secondTestVehicle]),
               ],
           verify: (_) {
             verify(() => vehicleRepository.getAll()).called(1);
@@ -97,85 +91,89 @@ void main() {
     });
 
     group("update vehicle", () {
-      Vehicle vehicle1 = Vehicle('ABC111', 'typeTest', Person('nameTest', 111));
-      Vehicle vehicle2 = Vehicle('ABC112', 'typeTest', Person('nameTest', 222));
       String registrationNumber = 'ABB111';
-      vehicle2.registrationNumber = registrationNumber;
+      secondTestVehicle.registrationNumber = registrationNumber;
       blocTest<VehiclesBloc, VehiclesState>("update vehicle succeess",
           setUp: () {
             when(() => vehicleRepository.update(any()))
-                .thenAnswer((_) async => vehicle2);
+                .thenAnswer((_) async => secondTestVehicle);
             when(() => vehicleRepository.getAll())
-                .thenAnswer((_) async => [vehicle1, vehicle2]);
+                .thenAnswer((_) async => [testVehicle, secondTestVehicle]);
           },
           build: () => VehiclesBloc(repository: vehicleRepository),
-          seed: () => VehiclesLoaded(vehicles: [vehicle1, vehicle2]),
-          act: (bloc) => bloc.add(UpdateVehicle(vehicle: vehicle2)),
+          seed: () =>
+              VehiclesLoaded(vehicles: [testVehicle, secondTestVehicle]),
+          act: (bloc) => bloc.add(UpdateVehicle(vehicle: secondTestVehicle)),
           expect: () => [
                 VehiclesLoaded(
-                    vehicles: [vehicle1, vehicle2], pending: vehicle2),
-                VehiclesLoaded(vehicles: [vehicle1, vehicle2], pending: null),
+                    vehicles: [testVehicle, secondTestVehicle],
+                    pending: secondTestVehicle),
+                VehiclesLoaded(
+                    vehicles: [testVehicle, secondTestVehicle], pending: null),
               ],
           verify: (_) {
-            verify(() => vehicleRepository.update(vehicle2)).called(1);
+            verify(() => vehicleRepository.update(secondTestVehicle)).called(1);
           });
       blocTest<VehiclesBloc, VehiclesState>("update vehicle failure",
           setUp: () {
-            when(() => vehicleRepository.update(vehicle2))
+            when(() => vehicleRepository.update(secondTestVehicle))
                 .thenThrow(Exception("failed to update vehicle"));
           },
           build: () => VehiclesBloc(repository: vehicleRepository),
-          seed: () => VehiclesLoaded(vehicles: [vehicle1, vehicle2]),
-          act: (bloc) => bloc.add(UpdateVehicle(vehicle: vehicle2)),
+          seed: () =>
+              VehiclesLoaded(vehicles: [testVehicle, secondTestVehicle]),
+          act: (bloc) => bloc.add(UpdateVehicle(vehicle: secondTestVehicle)),
           expect: () => [
                 VehiclesLoaded(
-                    vehicles: [vehicle1, vehicle2], pending: vehicle2),
+                    vehicles: [testVehicle, secondTestVehicle],
+                    pending: secondTestVehicle),
                 VehiclesError(
                     message: Exception("failed to update vehicle").toString())
               ],
           verify: (_) {
-            verify(() => vehicleRepository.update(vehicle2)).called(1);
+            verify(() => vehicleRepository.update(secondTestVehicle)).called(1);
           });
     });
 
     group("delete vehicle", () {
-      Vehicle vehicle1 = Vehicle('ABC111', 'typeTest', Person('nameTest', 111));
-      Vehicle vehicle2 = Vehicle('ABC112', 'typeTest', Person('nameTest', 222));
-
       blocTest<VehiclesBloc, VehiclesState>("delete vehicle succeess",
           setUp: () {
             when(() => vehicleRepository.delete(any()))
-                .thenAnswer((_) async => vehicle2);
+                .thenAnswer((_) async => secondTestVehicle);
             when(() => vehicleRepository.getAll())
-                .thenAnswer((_) async => [vehicle1]);
+                .thenAnswer((_) async => [testVehicle]);
           },
           build: () => VehiclesBloc(repository: vehicleRepository),
-          seed: () => VehiclesLoaded(vehicles: [vehicle1, vehicle2]),
-          act: (bloc) => bloc.add(DeleteVehicle(vehicle: vehicle2)),
+          seed: () =>
+              VehiclesLoaded(vehicles: [testVehicle, secondTestVehicle]),
+          act: (bloc) => bloc.add(DeleteVehicle(vehicle: secondTestVehicle)),
           expect: () => [
                 VehiclesLoaded(
-                    vehicles: [vehicle1, vehicle2], pending: vehicle2),
-                VehiclesLoaded(vehicles: [vehicle1], pending: null),
+                    vehicles: [testVehicle, secondTestVehicle],
+                    pending: secondTestVehicle),
+                VehiclesLoaded(vehicles: [testVehicle], pending: null),
               ],
           verify: (_) {
-            verify(() => vehicleRepository.delete(vehicle2)).called(1);
+            verify(() => vehicleRepository.delete(secondTestVehicle)).called(1);
           });
       blocTest<VehiclesBloc, VehiclesState>("delete vehicle failure",
           setUp: () {
-            when(() => vehicleRepository.delete(vehicle2))
+            when(() => vehicleRepository.delete(secondTestVehicle))
                 .thenThrow(Exception("failed to delete vehicle"));
           },
           build: () => VehiclesBloc(repository: vehicleRepository),
-          seed: () => VehiclesLoaded(vehicles: [vehicle1, vehicle2]),
-          act: (bloc) => bloc.add(DeleteVehicle(vehicle: vehicle2)),
+          seed: () =>
+              VehiclesLoaded(vehicles: [testVehicle, secondTestVehicle]),
+          act: (bloc) => bloc.add(DeleteVehicle(vehicle: secondTestVehicle)),
           expect: () => [
                 VehiclesLoaded(
-                    vehicles: [vehicle1, vehicle2], pending: vehicle2),
+                    vehicles: [testVehicle, secondTestVehicle],
+                    pending: secondTestVehicle),
                 VehiclesError(
                     message: Exception("failed to delete vehicle").toString())
               ],
           verify: (_) {
-            verify(() => vehicleRepository.delete(vehicle2)).called(1);
+            verify(() => vehicleRepository.delete(secondTestVehicle)).called(1);
           });
     });
   });
