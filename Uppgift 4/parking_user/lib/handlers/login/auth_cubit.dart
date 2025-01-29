@@ -1,4 +1,5 @@
 import 'package:hydrated_bloc/hydrated_bloc.dart';
+import 'package:parking_shared/parking_shared.dart';
 
 enum AuthStatus {
   unauthenticated,
@@ -6,37 +7,46 @@ enum AuthStatus {
   authenticated,
 }
 
-class AuthCubit extends HydratedCubit<AuthStatus> {
-  AuthCubit() : super(AuthStatus.unauthenticated);
+class AuthState {
+  final AuthStatus status;
+  Person? person;
+  AuthState({required this.status, this.person});
+}
 
-  login() async {
-    emit(AuthStatus.authenticating);
+class AuthCubit extends HydratedCubit<AuthState> {
+  AuthCubit() : super(AuthState(status: AuthStatus.unauthenticated));
+
+  login(Person owner) async {
+    emit(AuthState(status: AuthStatus.authenticating));
     try {
-      emit(AuthStatus.authenticated);
+      emit(AuthState(status: AuthStatus.authenticated, person: owner));
     } catch (e) {
-      emit(AuthStatus.unauthenticated);
+      emit(AuthState(status: AuthStatus.unauthenticated));
     }
   }
 
   void logout() {
-    emit(AuthStatus.unauthenticated);
+    emit(AuthState(status: AuthStatus.unauthenticated));
   }
 
   @override
-  AuthStatus? fromJson(Map<String, dynamic> json) {
-    return switch (json["authenticated"]) {
-      true => AuthStatus.authenticated,
-      _ => AuthStatus.unauthenticated,
-    };
+  AuthState? fromJson(Map<String, dynamic> json) {
+    return AuthState(
+        status: switch (json["authenticated"]) {
+          true => AuthStatus.authenticated,
+          _ => AuthStatus.unauthenticated,
+        },
+        person: Person.fromJSON(json["person"]));
   }
 
   @override
-  Map<String, dynamic>? toJson(AuthStatus state) {
+  Map<String, dynamic>? toJson(AuthState state) {
     return {
-      "authenticated": switch (state) {
+      "authenticated": switch (state.status) {
         AuthStatus.unauthenticated || AuthStatus.authenticating => false,
         AuthStatus.authenticated => true,
-      }
+      },
+      "person": state.person?.toJSON()
     };
   }
 }
