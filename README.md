@@ -21,8 +21,16 @@ A Flutter project that administrates users, parking spaces and parkings created 
 - Vehicles (owned by user) (Create, Read, Update, Delete)
 - Parkings (owned by user) (Read, Delete)
 
+## Features Shared
+- Blocs
+- Database handlers
+- Converters
+- Mocks
+- Models
+- Repositories
+- Shared widgets
+
 ## Limitations
-- Hot reload between user and admin is not implemented
 - Login a bit too complicated for users since id is currently used for that
 - User is currently not able to change it's own information
 
