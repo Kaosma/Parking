@@ -152,7 +152,7 @@ class _LoginPageState extends State<LoginPage> {
         body: FutureBuilder<List<Person>>(
             future: getAllOwnersHandler(),
             builder: (context, snapshot) {
-              final users = snapshot.data?.map((user) => {user.email});
+              final users = snapshot.data?.map((user) => user.email);
               return Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Form(
