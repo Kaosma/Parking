@@ -19,8 +19,4 @@ class FirebaseAuthRepository {
   Future<void> signOut() async {
     await _auth.signOut();
   }
-
-  Stream<User?> get userStream {
-    return _auth.authStateChanges();
-  }
 }

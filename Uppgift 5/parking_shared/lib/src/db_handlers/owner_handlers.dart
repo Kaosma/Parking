@@ -26,12 +26,20 @@ Future<Person?> getOwnerHandler(String userEmail, String userPassword) async {
   }
 }
 
-Future<bool> signOutHandler() async {
+Stream<Person?> get userStream {
+  return _auth.authStateChanges().asyncMap((changedUser) async {
+    if (changedUser == null) {
+      return null;
+    } else {
+      return await personRepository.getById(changedUser.uid);
+    }
+  });
+}
+
+Future signOutHandler() async {
   try {
     await _auth.signOut();
-    return true;
   } catch (e) {
     print(e);
-    return false;
   }
 }

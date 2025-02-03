@@ -1,28 +1,21 @@
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:parking_shared/parking_shared.dart';
 import 'package:parking_user/handlers/login/auth_cubit.dart';
 import 'package:parking_user/navigation/navigation.dart';
 import 'package:parking_user/navigation/pages/login_page.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  HydratedBloc.storage = await HydratedStorage.build(
-    storageDirectory: kIsWeb
-        ? HydratedStorage.webStorageDirectory
-        : await getApplicationDocumentsDirectory(),
-  );
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
   runApp(BlocProvider(
-      create: (context) => AuthCubit(), child: const ParkingUserApp()));
+      create: (context) => AuthCubit()..start(),
+      child: const ParkingUserApp()));
 }
 
 class ParkingUserApp extends StatelessWidget {

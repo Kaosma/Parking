@@ -14,15 +14,12 @@ class Person {
     return {
       'name': name,
       'personalNumber': personalNumber,
-      'email': email,
-      'password': password,
       'id': id,
     };
   }
 
   factory Person.fromJSON(Map<String, dynamic> json) {
-    return Person(json['name'], json['personalNumber'], json['email'],
-        json['password'], json['id']);
+    return Person(json['name'], json['personalNumber'], '', '', json['id']);
   }
 
   @override

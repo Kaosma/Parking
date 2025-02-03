@@ -209,12 +209,8 @@ class _UsersPageState extends State<UsersPage> {
 
                     if (parsedPersonalNumber != null) {
                       context.read<AuthBloc>().add(UpdatePerson(
-                          user: Person(
-                              nameController.text.trim(),
-                              parsedPersonalNumber,
-                              person.email,
-                              person.password,
-                              person.id)));
+                          user: Person(nameController.text.trim(),
+                              parsedPersonalNumber, person.email, person.id)));
                       Navigator.of(dialogContext).pop();
                     }
                   }
