@@ -12,6 +12,8 @@ void main() {
 
     setUp(() {
       personRepository = MockPersonRepository();
+      when(() => personRepository.getPersonsStream())
+          .thenAnswer((_) => Stream.value([testUser, secondTestUser]));
     });
 
     setUpAll(() {

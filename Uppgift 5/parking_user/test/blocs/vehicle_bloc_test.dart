@@ -13,6 +13,8 @@ void main() {
 
     setUp(() {
       vehicleRepository = MockVehicleRepository();
+      when(() => vehicleRepository.getVehiclesStream())
+          .thenAnswer((_) => Stream.value([testVehicle, secondTestVehicle]));
     });
 
     setUpAll(() {

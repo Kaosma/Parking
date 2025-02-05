@@ -21,6 +21,8 @@ void main() {
 
     setUp(() {
       parkingRepository = MockParkingRepository();
+      when(() => parkingRepository.getParkingsStream())
+          .thenAnswer((_) => Stream.value([testParking, secondTestParking]));
     });
 
     setUpAll(() {

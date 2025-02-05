@@ -11,6 +11,8 @@ void main() {
 
     setUp(() {
       parkingSpaceRepository = MockParkingSpaceRepository();
+      when(() => parkingSpaceRepository.getParkingSpacesStream()).thenAnswer(
+          (_) => Stream.value([testParkingSpace, secondTestParkingSpace]));
     });
 
     setUpAll(() {

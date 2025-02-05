@@ -20,9 +20,12 @@ A Flutter project that administrates users, parking spaces and parkings created 
 - Users (Create)
 - Vehicles (owned by user) (Create, Read, Update, Delete)
 - Parkings (owned by user) (Read, Delete)
+- Login with email and password
+- Persisted login using Firebase Auth
 
 ## Features Shared
 - Blocs
+- User stream update
 - Database handlers
 - Converters
 - Mocks
@@ -44,7 +47,7 @@ User: cd project/Uppgift_3/parking_user
 
 Install dependencies:
 ```bash
-flutter pub get
+Type "flutter pub get" in the root of the specific project
 ```
 
 ## Usage
@@ -53,6 +56,7 @@ Run the application:
 ```bash
 Enter main file in each project and press "play" button
 Choose what device you want to run on
+Or type "flutter run" from root of specific project
 ```
 
 ## License
