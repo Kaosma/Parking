@@ -6,6 +6,11 @@ class LoadParkings extends ParkingsEvent {}
 
 class ReloadParkings extends ParkingsEvent {}
 
+class ParkingsUpdated extends ParkingsEvent {
+  final List<Parking> parkings;
+  ParkingsUpdated({required this.parkings});
+}
+
 class UpdateParking extends ParkingsEvent {
   final Parking parking;
 

@@ -78,4 +78,21 @@ class VehicleRepository implements RepositoryInterface<Vehicle> {
   Future<void> delete(Vehicle vehicle) async {
     await database.child('/${vehicle.id}').remove();
   }
+
+  Stream<List<Vehicle>> getVehiclesStream() {
+    return database.onValue.map((event) {
+      if (event.snapshot.value != null) {
+        dynamic vehiclesMap = event.snapshot.value;
+        List<Vehicle> vehiclesList = [];
+        vehiclesMap.forEach((key, value) {
+          Map<String, dynamic> vehicle =
+              Map<String, dynamic>.from(json.decode(json.encode(value)));
+          vehiclesList.add(Vehicle.fromJSON(vehicle));
+        });
+        return vehiclesList;
+      } else {
+        return [];
+      }
+    });
+  }
 }

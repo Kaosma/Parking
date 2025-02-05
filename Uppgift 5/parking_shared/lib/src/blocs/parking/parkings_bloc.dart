@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 
@@ -9,6 +11,7 @@ part 'parkings_state.dart';
 
 class ParkingsBloc extends Bloc<ParkingsEvent, ParkingsState> {
   final ParkingRepository repository;
+  late StreamSubscription<List<Parking>> _parkingsSubscription;
 
   ParkingsBloc({required this.repository}) : super(ParkingsInitial()) {
     on<ParkingsEvent>((event, emit) async {
@@ -25,12 +28,21 @@ class ParkingsBloc extends Bloc<ParkingsEvent, ParkingsState> {
 
           case DeleteParking(parking: final finalParking):
             await onDeleteParking(finalParking, emit);
+
           case ReloadParkings():
             await onReloadParkings(emit);
+
+          case ParkingsUpdated():
+            on<ParkingsUpdated>((event, emit) {
+              emit(ParkingsLoaded(parkings: event.parkings));
+            });
         }
       } catch (e) {
         emit(ParkingsError(message: e.toString()));
       }
+    });
+    _parkingsSubscription = repository.getParkingsStream().listen((parkings) {
+      add(ParkingsUpdated(parkings: parkings));
     });
   }
 
@@ -85,5 +97,11 @@ class ParkingsBloc extends Bloc<ParkingsEvent, ParkingsState> {
     emit(ParkingsLoading());
     final parkingsFromRepository = await repository.getAll();
     emit(ParkingsLoaded(parkings: parkingsFromRepository));
+  }
+
+  @override
+  Future<void> close() {
+    _parkingsSubscription.cancel();
+    return super.close();
   }
 }

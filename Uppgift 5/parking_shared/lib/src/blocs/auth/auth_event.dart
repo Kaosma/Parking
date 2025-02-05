@@ -6,6 +6,11 @@ class LoadPersons extends AuthEvent {}
 
 class ReloadPersons extends AuthEvent {}
 
+class PersonsUpdated extends AuthEvent {
+  final List<Person> persons;
+  PersonsUpdated({required this.persons});
+}
+
 class UpdatePerson extends AuthEvent {
   final Person user;
 

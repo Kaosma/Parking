@@ -80,4 +80,21 @@ class ParkingSpaceRepository implements RepositoryInterface<ParkingSpace> {
   Future<void> delete(ParkingSpace parkingSpace) async {
     await database.child('/${parkingSpace.id}').remove();
   }
+
+  Stream<List<ParkingSpace>> getParkingSpacesStream() {
+    return database.onValue.map((event) {
+      if (event.snapshot.value != null) {
+        dynamic parkingSpacesMap = event.snapshot.value;
+        List<ParkingSpace> parkingSpacesList = [];
+        parkingSpacesMap.forEach((key, value) {
+          Map<String, dynamic> parkingSpace =
+              Map<String, dynamic>.from(json.decode(json.encode(value)));
+          parkingSpacesList.add(ParkingSpace.fromJSON(parkingSpace));
+        });
+        return parkingSpacesList;
+      } else {
+        return [];
+      }
+    });
+  }
 }

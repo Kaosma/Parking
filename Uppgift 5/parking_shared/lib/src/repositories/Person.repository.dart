@@ -95,4 +95,21 @@ class PersonRepository implements RepositoryInterface<Person> {
       }
     }
   }
+
+  Stream<List<Person>> getPersonsStream() {
+    return database.onValue.map((event) {
+      if (event.snapshot.value != null) {
+        dynamic personsMap = event.snapshot.value;
+        List<Person> personsList = [];
+        personsMap.forEach((key, value) {
+          Map<String, dynamic> person =
+              Map<String, dynamic>.from(json.decode(json.encode(value)));
+          personsList.add(Person.fromJSON(person));
+        });
+        return personsList;
+      } else {
+        return [];
+      }
+    });
+  }
 }

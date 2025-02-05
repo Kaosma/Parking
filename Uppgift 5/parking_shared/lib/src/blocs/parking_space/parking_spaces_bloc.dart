@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 
@@ -9,6 +11,7 @@ part 'parking_spaces_state.dart';
 
 class ParkingSpacesBloc extends Bloc<ParkingSpacesEvent, ParkingSpacesState> {
   final ParkingSpaceRepository repository;
+  late StreamSubscription<List<ParkingSpace>> _parkingSpacesSubscription;
 
   ParkingSpacesBloc({required this.repository})
       : super(ParkingSpacesInitial()) {
@@ -26,12 +29,22 @@ class ParkingSpacesBloc extends Bloc<ParkingSpacesEvent, ParkingSpacesState> {
 
           case DeleteParkingSpace(parkingSpace: final finalParkingSpace):
             await onDeleteParkingSpace(finalParkingSpace, emit);
+
           case ReloadParkingSpaces():
             await onReloadParkingSpaces(emit);
+
+          case ParkingSpacesUpdated():
+            on<ParkingSpacesUpdated>((event, emit) {
+              emit(ParkingSpacesLoaded(parkingSpaces: event.parkingSpaces));
+            });
         }
       } catch (e) {
         emit(ParkingSpacesError(message: e.toString()));
       }
+    });
+    _parkingSpacesSubscription =
+        repository.getParkingSpacesStream().listen((parkingSpaces) {
+      add(ParkingSpacesUpdated(parkingSpaces: parkingSpaces));
     });
   }
 
@@ -95,5 +108,11 @@ class ParkingSpacesBloc extends Bloc<ParkingSpacesEvent, ParkingSpacesState> {
     emit(ParkingSpacesLoading());
     final parkingSpacesFromRepository = await repository.getAll();
     emit(ParkingSpacesLoaded(parkingSpaces: parkingSpacesFromRepository));
+  }
+
+  @override
+  Future<void> close() {
+    _parkingSpacesSubscription.cancel();
+    return super.close();
   }
 }

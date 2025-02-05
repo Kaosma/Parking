@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 
@@ -9,6 +11,7 @@ part 'vehicles_state.dart';
 
 class VehiclesBloc extends Bloc<VehiclesEvent, VehiclesState> {
   final VehicleRepository repository;
+  late StreamSubscription<List<Vehicle>> _vehiclesSubscription;
 
   VehiclesBloc({required this.repository}) : super(VehiclesInitial()) {
     on<VehiclesEvent>((event, emit) async {
@@ -25,12 +28,21 @@ class VehiclesBloc extends Bloc<VehiclesEvent, VehiclesState> {
 
           case DeleteVehicle(vehicle: final finalVehicle):
             await onDeleteVehicle(finalVehicle, emit);
+
           case ReloadVehicles():
             await onReloadVehicles(emit);
+
+          case VehiclesUpdated():
+            on<VehiclesUpdated>((event, emit) {
+              emit(VehiclesLoaded(vehicles: event.vehicles));
+            });
         }
       } catch (e) {
         emit(VehiclesError(message: e.toString()));
       }
+    });
+    _vehiclesSubscription = repository.getVehiclesStream().listen((vehicles) {
+      add(VehiclesUpdated(vehicles: vehicles));
     });
   }
 
@@ -85,5 +97,11 @@ class VehiclesBloc extends Bloc<VehiclesEvent, VehiclesState> {
     emit(VehiclesLoading());
     final vehiclesFromRepository = await repository.getAll();
     emit(VehiclesLoaded(vehicles: vehiclesFromRepository));
+  }
+
+  @override
+  Future<void> close() {
+    _vehiclesSubscription.cancel();
+    return super.close();
   }
 }

@@ -4,7 +4,16 @@ sealed class VehiclesEvent {}
 
 class LoadVehicles extends VehiclesEvent {}
 
-class ReloadVehicles extends VehiclesEvent {}
+class ReloadVehicles extends VehiclesEvent {
+  final List<Vehicle> vehicles;
+
+  ReloadVehicles({required this.vehicles});
+}
+
+class VehiclesUpdated extends VehiclesEvent {
+  final List<Vehicle> vehicles;
+  VehiclesUpdated({required this.vehicles});
+}
 
 class UpdateVehicle extends VehiclesEvent {
   final Vehicle vehicle;
