@@ -4,6 +4,7 @@ export 'src/helpers/functions/convertUnixToDateTime.dart';
 export 'src/helpers/functions/getCurrentTime.dart';
 export 'src/helpers/functions/generateUuid.dart';
 export 'src/helpers/functions/isValidEmail.dart';
+export 'src/helpers/functions/formatDateTime.dart';
 export 'src/helpers/options/firebase_options.dart';
 export 'src/repositories/Person.repository.dart';
 export 'src/repositories/Vehicle.repository.dart';

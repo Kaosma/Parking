@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:parking_shared/parking_shared.dart';
+import 'package:parking_user/blocs/notification/notifications_bloc.dart';
 
 class ActiveParkingsPage extends StatefulWidget {
   const ActiveParkingsPage({super.key});
@@ -22,14 +23,22 @@ class _ActiveParkingsPageState extends State<ActiveParkingsPage> {
 
   @override
   Widget build(BuildContext context) {
+    NotificationState notificationState =
+        context.watch<NotificationBloc>().state;
     final owner = context.read<Person>();
     final formKey = GlobalKey<FormState>();
 
     Future<void> addParkingDialog(int timeNow) async {
       Vehicle? selectedVehicle;
       ParkingSpace? selectedParkingSpace;
-      String startTimeString = '';
-      String endTimeString = '';
+      int? startTime;
+      int? endTime;
+      startTime = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+      final TextEditingController startTimeController = TextEditingController(
+        text: formatDateTime(
+            DateTime.fromMillisecondsSinceEpoch(startTime * 1000)),
+      );
+      final TextEditingController endTimeController = TextEditingController();
 
       final List<Vehicle> vehicles = await getAllVehiclesHandler();
       final List<ParkingSpace> parkingSpaces =
@@ -47,6 +56,52 @@ class _ActiveParkingsPageState extends State<ActiveParkingsPage> {
           parkingSpaces.where((space) {
         return !activeParkingSpaceIds.contains(space.id);
       }).toList();
+
+      Future<void> _pickDateTime(bool isStart) async {
+        DateTime now = DateTime.now();
+
+        DateTime? pickedDate = await showDatePicker(
+          context: context,
+          initialDate: now,
+          firstDate: DateTime(2000),
+          lastDate: DateTime(2100),
+        );
+
+        if (pickedDate == null) return;
+
+        TimeOfDay? pickedTime = await showTimePicker(
+          context: context,
+          initialTime: TimeOfDay.fromDateTime(now),
+        );
+
+        if (pickedTime == null) return;
+
+        DateTime pickedDateTime = DateTime(
+          pickedDate.year,
+          pickedDate.month,
+          pickedDate.day,
+          pickedTime.hour,
+          pickedTime.minute,
+        );
+
+        int pickedUnixTime = pickedDateTime.millisecondsSinceEpoch ~/ 1000;
+
+        setState(() {
+          if (isStart) {
+            startTime = pickedUnixTime;
+            startTimeController.text = formatDateTime(pickedDateTime);
+          } else {
+            if (startTime != null && pickedUnixTime < startTime!) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text("Sluttid måste vara efter starttid!")),
+              );
+              return;
+            }
+            endTime = pickedUnixTime;
+            endTimeController.text = formatDateTime(pickedDateTime);
+          }
+        });
+      }
 
       showDialog(
         context: context,
@@ -106,41 +161,27 @@ class _ActiveParkingsPageState extends State<ActiveParkingsPage> {
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
-                    decoration: const InputDecoration(
-                      labelText: 'Starttid (Unix)',
+                    readOnly: true,
+                    controller: startTimeController,
+                    decoration: InputDecoration(
+                      labelText: 'Starttid',
+                      suffixIcon: IconButton(
+                        icon: Icon(Icons.calendar_today),
+                        onPressed: () => _pickDateTime(true),
+                      ),
                     ),
-                    keyboardType: TextInputType.number,
-                    onChanged: (value) {
-                      startTimeString = value;
-                    },
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Ange en starttid';
-                      }
-                      if (int.tryParse(value) == null) {
-                        return 'Starttid måste vara ett heltal';
-                      }
-                      return null;
-                    },
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16),
                   TextFormField(
-                    decoration: const InputDecoration(
-                      labelText: 'Sluttid (Unix)',
+                    readOnly: true,
+                    controller: endTimeController,
+                    decoration: InputDecoration(
+                      labelText: 'Sluttid',
+                      suffixIcon: IconButton(
+                        icon: Icon(Icons.calendar_today),
+                        onPressed: () => _pickDateTime(false),
+                      ),
                     ),
-                    keyboardType: TextInputType.number,
-                    onChanged: (value) {
-                      endTimeString = value;
-                    },
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Ange en sluttid';
-                      }
-                      if (int.tryParse(value) == null) {
-                        return 'Sluttid måste vara ett heltal';
-                      }
-                      return null;
-                    },
                   ),
                 ],
               ),
@@ -155,19 +196,34 @@ class _ActiveParkingsPageState extends State<ActiveParkingsPage> {
               ElevatedButton(
                 onPressed: () {
                   if (formKey.currentState!.validate()) {
-                    final int? startTime = int.tryParse(startTimeString);
-                    final int? endTime = int.tryParse(endTimeString);
-
                     if (startTime != null && endTime != null) {
+                      final newParking = Parking(
+                        vehicle: selectedVehicle!,
+                        parkingSpace: selectedParkingSpace!,
+                        startTime: startTime!,
+                        endTime: endTime!,
+                      );
+                      bool isScheduled =
+                          notificationState.isIdScheduled(newParking.id);
                       if (selectedVehicle != null &&
                           selectedParkingSpace != null) {
-                        context.read<ParkingsBloc>().add(CreateParking(
-                                parking: Parking(
-                              vehicle: selectedVehicle!,
-                              parkingSpace: selectedParkingSpace!,
-                              startTime: startTime,
-                              endTime: endTime,
-                            )));
+                        context
+                            .read<ParkingsBloc>()
+                            .add(CreateParking(parking: newParking));
+                        if (isScheduled) {
+                          context
+                              .read<NotificationBloc>()
+                              .add(CancelNotification(id: newParking.id));
+                        } else {
+                          context.read<NotificationBloc>().add(ScheduleNotification(
+                              id: newParking.id,
+                              title: 'Parkering avslutad',
+                              content:
+                                  'Parkering på ${newParking.parkingSpace.address} för ${newParking.vehicle.registrationNumber} avslutad.',
+                              deliveryTime: DateTime.fromMillisecondsSinceEpoch(
+                                  newParking.endTime * 1000)));
+                        }
+
                         Navigator.of(dialogContext).pop();
                       }
                     }
