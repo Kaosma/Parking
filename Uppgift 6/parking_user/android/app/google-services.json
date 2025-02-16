@@ -1,0 +1,49 @@
+{
+  "project_info": {
+    "project_number": "1059671592375",
+    "firebase_url": "https://serverparking-9de55-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "serverparking-9de55",
+    "storage_bucket": "serverparking-9de55.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1059671592375:android:4f349a050f2aeb7084ec32",
+        "android_client_info": {
+          "package_name": "com.example.parking_user"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBhGwyn8QYsmxlT7qW3GltoGemRVQaFrgE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1059671592375:android:da09b2498cf239c384ec32",
+        "android_client_info": {
+          "package_name": "com.kaosma.parking_server"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBhGwyn8QYsmxlT7qW3GltoGemRVQaFrgE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

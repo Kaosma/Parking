@@ -30,19 +30,19 @@ class _ListCardState extends State<ListCard>
   @override
   void initState() {
     super.initState();
+    _controller = AnimationController(
+      duration: const Duration(seconds: 3),
+      vsync: this,
+    );
+
     if (widget.isActive) {
-      _controller = AnimationController(
-        duration: const Duration(seconds: 3),
-        vsync: this,
-      )..repeat(reverse: true);
+      _controller.repeat(reverse: true);
     }
   }
 
   @override
   void dispose() {
-    if (widget.isActive) {
-      _controller.dispose();
-    }
+    _controller.dispose();
     super.dispose();
   }
 

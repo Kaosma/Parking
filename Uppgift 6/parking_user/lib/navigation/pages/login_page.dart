@@ -191,7 +191,7 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   child: const Text('Registrera ny användare'),
                 ),
-                const SizedBox(height: 16.0),
+                // const SizedBox(height: 16.0),
                 ElevatedButton(
                   onPressed: authenticate,
                   child: const Text('Logga in'),

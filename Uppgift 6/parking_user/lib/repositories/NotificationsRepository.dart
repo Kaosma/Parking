@@ -24,7 +24,9 @@ Future<FlutterLocalNotificationsPlugin> initializeNotifications() async {
       '@mipmap/ic_launcher'); // TODO: Change this to an icon of your choice if you want to fix it.
   var initializationSettingsIOS = const DarwinInitializationSettings();
   var initializationSettings = InitializationSettings(
-      android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
+      android: initializationSettingsAndroid,
+      iOS: initializationSettingsIOS,
+      macOS: initializationSettingsIOS);
   await flutterLocalNotificationsPlugin.initialize(initializationSettings);
   return flutterLocalNotificationsPlugin;
 }
