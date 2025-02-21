@@ -22,6 +22,7 @@ A Flutter project that administrates users, parking spaces and parkings created 
 - Parkings (owned by user) (Read, Delete)
 - Login with email and password
 - Persisted login using Firebase Auth
+- Notifications for when a user's parking is ended (iOS only)
 
 ## Features Shared
 - Blocs
